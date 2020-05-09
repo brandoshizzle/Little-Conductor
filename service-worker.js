@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/little-conductor/precache-manifest.9f478d463051219fe6386d6d332fd572.js"
+  "/Little-Conductor/precache-manifest.e1907c70cb7aac1df1e66e597e8445a7.js"
 );
 
 workbox.clientsClaim();
@@ -28,7 +28,7 @@ self.__precacheManifest = [].concat(self.__precacheManifest || []);
 workbox.precaching.suppressWarnings();
 workbox.precaching.precacheAndRoute(self.__precacheManifest, {});
 
-workbox.routing.registerNavigationRoute("/little-conductor/index.html", {
+workbox.routing.registerNavigationRoute("/Little-Conductor/index.html", {
   
   blacklist: [/^\/_/,/\/[^/]+\.[^/]+$/],
 });
