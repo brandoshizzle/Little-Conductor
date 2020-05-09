@@ -7,7 +7,7 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import useAxios from 'axios-hooks';
 import { view } from '@risingstack/react-easy-state';
-import state from './../store';
+import { user } from './../store';
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme) => ({
 	list: {
 		position: 'relative',
 		overflow: 'auto',
-		maxHeight: '70vh',
+		maxHeight: '65vh',
 	},
 }));
 
@@ -36,7 +36,7 @@ const AlbumList = (props) => {
 
 	const handleListItemClick = (event, index) => {
 		setSelectedIndex(index);
-		state.album = data.items[index];
+		user.album = data.items[index];
 	};
 	if (loading) return <p>Loading...</p>;
 	if (error) return <p>Error!</p>;

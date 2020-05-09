@@ -6,6 +6,10 @@ import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import useAxios from 'axios-hooks';
+
+import { view } from '@risingstack/react-easy-state';
+import { user } from './../store';
+
 import PlaylistAlbumsPage from './PlaylistAlbumsPage';
 
 function TabPanel(props) {
@@ -42,7 +46,6 @@ const Main = (props) => {
 	const classes = useStyles();
 	const { token } = props;
 	const [value, setValue] = useState(0);
-	let user = { name: '', id: '' };
 
 	const [{ data, loading, error }, refetch] = useAxios({
 		url: 'https://api.spotify.com/v1/me',
@@ -54,7 +57,8 @@ const Main = (props) => {
 
 	if (data) {
 		console.log(data);
-		user = { name: data.display_name, id: data.id };
+		user.name = data.display_name;
+		user.id = data.id;
 	}
 
 	const handleChange = (event, newValue) => {
@@ -71,7 +75,7 @@ const Main = (props) => {
 					</Tabs>
 				</AppBar>
 				<TabPanel value={value} index={0}>
-					<PlaylistAlbumsPage token={token} user={user} />
+					<PlaylistAlbumsPage token={token} />
 				</TabPanel>
 				<TabPanel value={value} index={1}>
 					Item Two
@@ -103,4 +107,4 @@ const Main = (props) => {
 	);
 };
 
-export default Main;
+export default view(Main);

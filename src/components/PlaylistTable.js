@@ -1,9 +1,9 @@
-import React, { forwardRef, useEffect, useState } from 'react';
+import React, { forwardRef, useEffect } from 'react';
 import MaterialTable from 'material-table';
 import axios from 'axios';
 
-import { view, autoEffect } from '@risingstack/react-easy-state';
-import state from './../store';
+import { view } from '@risingstack/react-easy-state';
+import { playlistArray, user } from './../store';
 
 import AddBox from '@material-ui/icons/AddBox';
 import ArrowDownward from '@material-ui/icons/ArrowDownward';
@@ -42,25 +42,16 @@ const tableIcons = {
 };
 
 const PlaylistTable = (props) => {
-	const { token, user } = props;
-	// const [playlists, setPlaylists] = useState(state.allPlaylists);
-
-	let playlists = state.allPlaylists;
-
-	useEffect(() => {
-		console.log('render time');
-		playlists = state.allPlaylists;
-	});
+	const { token } = props;
 
 	// Get data from storage or API on launch
 	useEffect(() => {
 		async function loadTable() {
 			let nextLink;
-			let newPlaylistsFromAPI = [];
 			do {
 				let res = await axios.get(nextLink || `https://api.spotify.com/v1/me/playlists?limit=50`, {
 					headers: {
-						Authorization: 'Bearer ' + token,
+						Authorization: 'Bearer ' + user.token,
 					},
 				});
 				console.log(res);
@@ -68,8 +59,8 @@ const PlaylistTable = (props) => {
 				for (const i in playlistBatch) {
 					let playlist = playlistBatch[i];
 					if (playlist.owner.id === user.id) {
-						if (!state.allPlaylists.hasOwnProperty(playlist.id)) {
-							state.allPlaylists[playlist.id] = {
+						if (!user.allPlaylists.hasOwnProperty(playlist.id)) {
+							user.allPlaylists[playlist.id] = {
 								id: playlist.id,
 								name: playlist.name,
 								url: playlist.external_urls.spotify,
@@ -86,15 +77,15 @@ const PlaylistTable = (props) => {
 
 			const delayIncrement = 300;
 			let currentDelay = -delayIncrement;
-			for (const i in state.allPlaylists) {
-				let playlist = state.allPlaylists[i];
+			for (const i in user.allPlaylists) {
+				let playlist = user.allPlaylists[i];
 				if (playlist.albumList === 'Loading...') {
 					await delay(currentDelay);
 					const [newTracks, newAlbums, newAlbumList] = await getTracksAndAlbums(playlist.id);
 					// console.log(newTracks, newAlbums, newAlbumList);
-					state.allPlaylists[i].tracks = newTracks;
-					state.allPlaylists[i].albums = newAlbums;
-					state.allPlaylists[i].albumList = newAlbumList;
+					user.allPlaylists[i].tracks = newTracks;
+					user.allPlaylists[i].albums = newAlbums;
+					user.allPlaylists[i].albumList = newAlbumList;
 					// currentDelay += delayIncrement;
 				}
 			}
@@ -150,17 +141,18 @@ const PlaylistTable = (props) => {
 					{ title: 'Name', field: 'name' },
 					{ title: 'Albums', field: 'albumList' },
 				]}
-				data={Object.values(playlists)}
+				data={playlistArray()}
 				icons={tableIcons}
 				options={{
 					showTitle: false,
 					selection: true,
 					// paging: false,
-					maxBodyHeight: '60vh',
+					pageSize: 20,
+					maxBodyHeight: '52vh',
 					draggable: false,
 					// actionsColumnIndex: -1,
 				}}
-				onSelectionChange={(rows) => (state.selectedPlaylists = rows)}
+				onSelectionChange={(rows) => (user.selectedPlaylists = rows)}
 			/>
 		</div>
 	);

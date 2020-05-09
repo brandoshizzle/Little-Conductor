@@ -20,21 +20,21 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PlaylistAlbumsPage = (props) => {
-	const { token, user } = props;
+	const { token } = props;
 	const classes = useStyles();
 
 	return (
 		<div className={classes.root}>
 			<Grid container spacing={3}>
 				<Grid item xs={3}>
-					<Typography component="h5">Albums</Typography>
+					{/* <Typography component="h5">Albums</Typography> */}
 					<Paper className={classes.paper}>
 						<AlbumList token={token} />
 					</Paper>
 				</Grid>
 				<Grid item xs={9}>
-					<Typography component="h5">Playlists</Typography>
-					<PlaylistTable token={token} user={user} />
+					{/* <Typography component="h5">Playlists</Typography> */}
+					<PlaylistTable token={token} />
 				</Grid>
 				<Grid item xs={12}>
 					<ActionButtons token={token} />

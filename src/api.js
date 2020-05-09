@@ -1,19 +1,19 @@
-import state from './store';
+import { user } from './store';
 import axios from 'axios';
 
 const APIdelay = 300;
 
 export async function addAlbum(side) {
 	console.log('Go time!');
-	state.progress.done = 0;
-	state.progress.total = state.selectedPlaylists.length;
-	state.progress.percent = 0;
+	user.progress.done = 0;
+	user.progress.total = user.selectedPlaylists.length;
+	user.progress.percent = 0;
 
 	let delayms = 0;
 
-	let res = await axios.get(`https://api.spotify.com/v1/albums/${state.album.id}/tracks`, {
+	let res = await axios.get(`https://api.spotify.com/v1/albums/${user.album.id}/tracks`, {
 		headers: {
-			Authorization: 'Bearer ' + state.token,
+			Authorization: 'Bearer ' + user.token,
 		},
 	});
 	const albumDetails = res.data;
@@ -22,10 +22,11 @@ export async function addAlbum(side) {
 		trackURIs.push(albumDetails.items[i].uri);
 	}
 
-	for (var j = 0; j < state.selectedPlaylists.length; j++) {
-		const playlist = state.selectedPlaylists[j];
+	for (var j = 0; j < user.selectedPlaylists.length; j++) {
+		const playlist = user.selectedPlaylists[j];
 		// Don't add album if it's already on the playlist
-		if (playlist.albumList.indexOf(state.album.name) === -1) {
+		console.log(playlist.albumList, user.album.name, playlist.albumList.indexOf(user.album.name));
+		if (playlist.albumList.indexOf(user.album.name) === -1) {
 			let data =
 				side === 'start'
 					? {
@@ -38,20 +39,20 @@ export async function addAlbum(side) {
 			try {
 				let res = await axios.post(`https://api.spotify.com/v1/playlists/${playlist.id}/tracks`, data, {
 					headers: {
-						Authorization: 'Bearer ' + state.token,
+						Authorization: 'Bearer ' + user.token,
 						'Content-Type': 'application/json',
 					},
 				});
 				// Update local store
-				const firstTrackPos = side === 'start' ? 0 : state.allPlaylists[playlist.id].tracks.length;
-				state.allPlaylists[playlist.id].albumList =
+				const firstTrackPos = side === 'start' ? 0 : user.allPlaylists[playlist.id].tracks.length;
+				user.allPlaylists[playlist.id].albumList =
 					side === 'start'
-						? `${state.album.name}, ` + state.allPlaylists[playlist.id].albumList
-						: (state.allPlaylists[playlist.id].albumList += `, ${state.album.name}`);
+						? `${user.album.name}, ` + user.allPlaylists[playlist.id].albumList
+						: (user.allPlaylists[playlist.id].albumList += `, ${user.album.name}`);
 
 				for (var k = 0; k < albumDetails.total; k++) {
 					let nextNum = firstTrackPos + k;
-					state.allPlaylists[playlist.id].tracks[nextNum] = {
+					user.allPlaylists[playlist.id].tracks[nextNum] = {
 						place: nextNum,
 						id: albumDetails.items[k].id,
 						album: albumDetails.name,
@@ -62,8 +63,8 @@ export async function addAlbum(side) {
 			}
 		}
 
-		state.progress.done++;
-		state.progress.percent = (state.progress.done / state.progress.total) * 100;
+		user.progress.done++;
+		user.progress.percent = (user.progress.done / user.progress.total) * 100;
 		delayms += APIdelay;
 		await delay(delayms);
 	}

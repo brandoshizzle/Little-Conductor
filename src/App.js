@@ -4,7 +4,7 @@ import hash from './hash';
 import Main from './components/Main';
 import logo from './logo.svg';
 import './App.css';
-import state from './store';
+import { user } from './store';
 
 class App extends Component {
 	constructor() {
@@ -33,7 +33,7 @@ class App extends Component {
 				token: _token,
 			});
 			localStorage.setItem('token', _token);
-			state.token = _token;
+			user.token = _token;
 			// this.getCurrentlyPlaying(_token);
 		}
 	}

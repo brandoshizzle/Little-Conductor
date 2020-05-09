@@ -1,9 +1,11 @@
 import { store } from '@risingstack/react-easy-state';
 import { observe } from '@nx-js/observer-util';
 
-const state = localStorage.getItem('state')
-	? store(JSON.parse(localStorage.getItem('state')))
+export const user = localStorage.getItem('user')
+	? store(JSON.parse(localStorage.getItem('user')))
 	: store({
+			name: '',
+			id: '',
 			token: '',
 			allPlaylists: {},
 			album: {},
@@ -17,9 +19,32 @@ const state = localStorage.getItem('state')
 	  });
 
 observe(() => {
-	localStorage.setItem('state', JSON.stringify(state));
+	localStorage.setItem('user', JSON.stringify(user));
 });
 
-export default state;
+// observe(() => {
+// 	playlistArray = [];
+// 	for (var playlist in user.allPlaylists) {
+// 		const newObj = {
+// 			...user.allPlaylists[playlist],
+// 		};
+// 		playlistArray.push(newObj);
+// 	}
+// 	// playlistArray = Object.values(user.allPlaylists);
+// 	console.log(playlistArray);
+// });
 
-window.state = state;
+export function playlistArray() {
+	let test = [];
+	for (var playlist in user.allPlaylists) {
+		const newObj = {
+			...user.allPlaylists[playlist],
+		};
+		test.push(newObj);
+	}
+	// playlistArray = Object.values(user.allPlaylists);
+	console.log(test);
+	return test;
+}
+
+window.user = user;

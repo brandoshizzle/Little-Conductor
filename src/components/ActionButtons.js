@@ -6,7 +6,7 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import Typography from '@material-ui/core/Typography';
 
 import { view } from '@risingstack/react-easy-state';
-import state from './../store';
+import { user } from './../store';
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -36,7 +36,7 @@ const ActionButtons = (props) => {
 				<Typography variant="subtitle1">Current Task</Typography>
 				<LinearProgress
 					variant="determinate"
-					value={state.progress.percent}
+					value={user.progress.percent}
 					color="secondary"
 					className={classes.progress}
 				/>
@@ -79,7 +79,7 @@ const ActionButtons = (props) => {
 				color="primary"
 				className={classes.item}
 				onClick={() => {
-					localStorage.removeItem('state');
+					localStorage.removeItem('user');
 				}}
 			>
 				Reload all playlists
