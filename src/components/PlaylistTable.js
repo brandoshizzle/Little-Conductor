@@ -65,6 +65,7 @@ const PlaylistTable = (props) => {
 								name: playlist.name,
 								url: playlist.external_urls.spotify,
 								tracks_endpoint: playlist.tracks.href,
+								description: decodeURIComponent(playlist.description),
 								tracks: {},
 								albumList: 'Loading...',
 								albums: {},
@@ -137,8 +138,8 @@ const PlaylistTable = (props) => {
 		<div style={{ maxWidth: '100%' }}>
 			<MaterialTable
 				columns={[
-					// { title: 'Cover', field: 'cover' },
-					{ title: 'Name', field: 'name' },
+					{ title: 'Name', field: 'name', width: 250 },
+					{ title: 'Description', field: 'description', width: 300 },
 					{ title: 'Albums', field: 'albumList' },
 				]}
 				data={playlistArray()}

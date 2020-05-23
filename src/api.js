@@ -47,21 +47,6 @@ export async function addAlbums(side) {
 						'Content-Type': 'application/json',
 					},
 				});
-				// // Update local store (DOESN'T WORK)
-				// const firstTrackPos = side === 'start' ? 0 : user.allPlaylists[playlist.id].tracks.length;
-				// user.allPlaylists[playlist.id].albumList =
-				// 	side === 'start'
-				// 		? `${user.album.name}, ` + user.allPlaylists[playlist.id].albumList
-				// 		: (user.allPlaylists[playlist.id].albumList += `, ${user.album.name}`);
-
-				// for (var k = 0; k < albumDetails.total; k++) {
-				// 	let nextNum = firstTrackPos + k;
-				// 	user.allPlaylists[playlist.id].tracks[nextNum] = {
-				// 		place: nextNum,
-				// 		id: albumDetails.items[k].id,
-				// 		album: albumDetails.name,
-				// 	};
-				// }
 			} catch (err) {
 				console.log(err);
 			}
@@ -72,28 +57,58 @@ export async function addAlbums(side) {
 		await delay(delayms);
 	}
 	// Retreive all modified playlists again from spotify to ensure they are up to date.
-	updateLocalPlaylists();
+	updateLocalPlaylistTracks();
 	resetProgress();
 }
 
-export async function updateLocalPlaylists() {
+export async function updateLocalPlaylistTracks() {
 	// Loop through all playlists, getting the data
 	resetProgress();
 	let delayms = 0;
 	for (var i = 0; i < user.selectedPlaylists.length; i++) {
 		const id = user.selectedPlaylists[i].id;
-		const [newTracks, newAlbums, newAlbumList] = await getPlaylistDetails(id);
+		const [newTracks, newAlbums, newAlbumList] = await getPlaylistTracks(id);
 		user.allPlaylists[id].tracks = newTracks;
 		user.allPlaylists[id].albums = newAlbums;
 		user.allPlaylists[id].albumList = newAlbumList;
-
 		updateProgress();
 		delayms += APIdelay;
 		await delay(delayms);
 	}
 }
 
-export async function getPlaylistDetails(id) {
+export async function replaceDescription(description) {
+	console.log('Go time!');
+	resetProgress();
+	let delayms = 0;
+
+	// Go through each playlist and replace the description
+	for (var j = 0; j < user.selectedPlaylists.length; j++) {
+		const playlist = user.selectedPlaylists[j];
+		let data = { description };
+		try {
+			let res = await axios.put(`https://api.spotify.com/v1/playlists/${playlist.id}/`, data, {
+				headers: {
+					Authorization: 'Bearer ' + user.token,
+					'Content-Type': 'application/json',
+				},
+			});
+			// If successful, update local
+			if (res.status === 200) {
+				user.allPlaylists[playlist.id].description = description;
+			}
+		} catch (err) {
+			console.log(err);
+		}
+
+		updateProgress();
+		delayms += APIdelay;
+		await delay(delayms);
+	}
+	resetProgress();
+}
+
+export async function getPlaylistTracks(id) {
 	let nextLink;
 	let APItracks = [];
 	let tracks = {};
