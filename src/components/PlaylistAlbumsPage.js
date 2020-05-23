@@ -7,6 +7,7 @@ import Typography from '@material-ui/core/Typography';
 import AlbumList from './AlbumList';
 import PlaylistTable from './PlaylistTable';
 import ActionButtons from './ActionButtons';
+import AlbumChips from './AlbumChips';
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -30,6 +31,7 @@ const PlaylistAlbumsPage = (props) => {
 					{/* <Typography component="h5">Albums</Typography> */}
 					<Paper className={classes.paper}>
 						<AlbumList token={token} />
+						<AlbumChips />
 					</Paper>
 				</Grid>
 				<Grid item xs={9}>
