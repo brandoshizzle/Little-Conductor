@@ -46,7 +46,7 @@ const ActionButtons = (props) => {
 				color="primary"
 				className={classes.item}
 				onClick={() => {
-					api.addAlbum('start');
+					api.addAlbums('start');
 				}}
 			>
 				Add to start
@@ -56,7 +56,7 @@ const ActionButtons = (props) => {
 				color="primary"
 				className={classes.item}
 				onClick={() => {
-					api.addAlbum('end');
+					api.addAlbums('end');
 				}}
 			>
 				Add to end

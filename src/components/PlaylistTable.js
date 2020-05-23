@@ -83,9 +83,9 @@ const PlaylistTable = (props) => {
 					await delay(currentDelay);
 					const [newTracks, newAlbums, newAlbumList] = await getTracksAndAlbums(playlist.id);
 					// console.log(newTracks, newAlbums, newAlbumList);
-					user.allPlaylists[i].tracks = newTracks;
-					user.allPlaylists[i].albums = newAlbums;
-					user.allPlaylists[i].albumList = newAlbumList;
+					user.allPlaylists[playlist.id].tracks = newTracks;
+					user.allPlaylists[playlist.id].albums = newAlbums;
+					user.allPlaylists[playlist.id].albumList = newAlbumList;
 					// currentDelay += delayIncrement;
 				}
 			}

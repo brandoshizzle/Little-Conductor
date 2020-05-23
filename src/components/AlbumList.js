@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
-import useAxios from 'axios-hooks';
+// import useAxios from 'axios-hooks';
+import axios from 'axios';
 import { view } from '@risingstack/react-easy-state';
 import { user } from './../store';
 
@@ -24,41 +25,71 @@ const useStyles = makeStyles((theme) => ({
 const AlbumList = (props) => {
 	const classes = useStyles();
 	const { token } = props;
-	const [selectedIndex, setSelectedIndex] = useState(0);
+	// const [selectedAlbums, setSelectedAlbums] = useState([]);
+	// let [albums, setAlbums] = useState([]);
 
-	const [{ data, loading, error }] = useAxios({
-		url: 'https://api.spotify.com/v1/artists/4SCWiQbJCMTHK737aNUqBJ/albums?offset=0&limit=20&market=CA',
-		method: 'GET',
-		headers: {
-			Authorization: 'Bearer ' + token,
-		},
-	});
+	useEffect(() => {
+		async function loadAlbums() {
+			let nextLink;
+			do {
+				let res = await axios.get(
+					nextLink ||
+						'https://api.spotify.com/v1/artists/4SCWiQbJCMTHK737aNUqBJ/albums?offset=0&limit=50&market=CA',
+					{
+						headers: {
+							Authorization: 'Bearer ' + token,
+						},
+					}
+				);
+				// console.log(res);
+				// albums = albums.concat(res.data.items);
+				console.log(user);
+				for (var i = 0; i < res.data.items.length; i++) {
+					user.allAlbums[res.data.items[i].id] = res.data.items[i];
+				}
+				nextLink = res.data.next;
+			} while (nextLink);
+		}
+		// Get all LS albums
+		loadAlbums();
+	}, []);
 
-	const handleListItemClick = (event, index) => {
-		setSelectedIndex(index);
-		user.album = data.items[index];
+	const handleListItemClick = (event, id) => {
+		if (user.selectedAlbums.indexOf(id) > -1) {
+			const newSelectedAlbums = user.selectedAlbums.filter((item) => item !== id);
+			user.selectedAlbums = newSelectedAlbums;
+		} else {
+			user.selectedAlbums = user.selectedAlbums.concat(id);
+		}
 	};
-	if (loading) return <p>Loading...</p>;
-	if (error) return <p>Error!</p>;
 
 	return (
 		<div className={classes.root}>
 			<List className={classes.list} component="nav" aria-label="main mailbox folders">
-				{data.items.map((album, i) => (
-					<ListItem
-						button
-						selected={selectedIndex === i}
-						onClick={(event) => handleListItemClick(event, i)}
-						key={album.id}
-					>
-						<ListItemAvatar>
-							<Avatar variant="square">
-								<img src={album.images[1].url} alt="cover" />
-							</Avatar>
-						</ListItemAvatar>
-						<ListItemText primary={album.name} />
-					</ListItem>
-				))}
+				{user.allAlbums &&
+					Object.values(user.allAlbums).map((album, i) => {
+						const rDate = new Date(album.release_date);
+						return (
+							<ListItem
+								button
+								selected={user.selectedAlbums.indexOf(album.id) > -1}
+								onClick={(event) => handleListItemClick(event, album.id)}
+								key={album.id}
+							>
+								<ListItemAvatar>
+									<Avatar variant="square" src={album.images[1].url}></Avatar>
+								</ListItemAvatar>
+								<ListItemText
+									primary={album.name}
+									secondary={rDate.toLocaleDateString('en-US', {
+										year: 'numeric',
+										month: 'long',
+										day: 'numeric',
+									})}
+								/>
+							</ListItem>
+						);
+					})}
 			</List>
 		</div>
 	);

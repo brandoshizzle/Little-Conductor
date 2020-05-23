@@ -8,7 +8,8 @@ export const user = localStorage.getItem('user')
 			id: '',
 			token: '',
 			allPlaylists: {},
-			album: {},
+			selectedAlbums: [],
+			allAlbums: {},
 			selectedPlaylists: [],
 			progress: {
 				done: 0,
@@ -43,7 +44,7 @@ export function playlistArray() {
 		test.push(newObj);
 	}
 	// playlistArray = Object.values(user.allPlaylists);
-	console.log(test);
+	// console.log(test);
 	return test;
 }
 

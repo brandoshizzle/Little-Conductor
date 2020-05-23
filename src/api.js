@@ -3,30 +3,34 @@ import axios from 'axios';
 
 const APIdelay = 300;
 
-export async function addAlbum(side) {
+export async function addAlbums(side) {
 	console.log('Go time!');
-	user.progress.done = 0;
-	user.progress.total = user.selectedPlaylists.length;
-	user.progress.percent = 0;
-
+	resetProgress();
+	let albumDetails = [];
 	let delayms = 0;
-
-	let res = await axios.get(`https://api.spotify.com/v1/albums/${user.album.id}/tracks`, {
-		headers: {
-			Authorization: 'Bearer ' + user.token,
-		},
-	});
-	const albumDetails = res.data;
 	let trackURIs = [];
-	for (var i = 0; i < albumDetails.total; i++) {
-		trackURIs.push(albumDetails.items[i].uri);
+	for (var i = 0; i < user.selectedAlbums.length; i++) {
+		// console.log(user.selectedAlbums);
+		let res = await axios.get(`https://api.spotify.com/v1/albums/${user.selectedAlbums[i]}/tracks`, {
+			headers: {
+				Authorization: 'Bearer ' + user.token,
+			},
+		});
+		albumDetails = albumDetails.concat(res.data);
+		console.log(albumDetails);
+		for (var cha = 0; cha < albumDetails[i].total; cha++) {
+			trackURIs.push(albumDetails[i].items[cha].uri);
+		}
 	}
+	// console.log(trackURIs);
 
+	// Go through each playlist and add the albums to it
 	for (var j = 0; j < user.selectedPlaylists.length; j++) {
 		const playlist = user.selectedPlaylists[j];
 		// Don't add album if it's already on the playlist
-		console.log(playlist.albumList, user.album.name, playlist.albumList.indexOf(user.album.name));
-		if (playlist.albumList.indexOf(user.album.name) === -1) {
+		// console.log(playlist.albumList, user.album.name, playlist.albumList.indexOf(user.album.name));
+		// if (playlist.albumList.indexOf(user.album.name) === -1) {
+		if (true) {
 			let data =
 				side === 'start'
 					? {
@@ -43,31 +47,83 @@ export async function addAlbum(side) {
 						'Content-Type': 'application/json',
 					},
 				});
-				// Update local store
-				const firstTrackPos = side === 'start' ? 0 : user.allPlaylists[playlist.id].tracks.length;
-				user.allPlaylists[playlist.id].albumList =
-					side === 'start'
-						? `${user.album.name}, ` + user.allPlaylists[playlist.id].albumList
-						: (user.allPlaylists[playlist.id].albumList += `, ${user.album.name}`);
+				// // Update local store (DOESN'T WORK)
+				// const firstTrackPos = side === 'start' ? 0 : user.allPlaylists[playlist.id].tracks.length;
+				// user.allPlaylists[playlist.id].albumList =
+				// 	side === 'start'
+				// 		? `${user.album.name}, ` + user.allPlaylists[playlist.id].albumList
+				// 		: (user.allPlaylists[playlist.id].albumList += `, ${user.album.name}`);
 
-				for (var k = 0; k < albumDetails.total; k++) {
-					let nextNum = firstTrackPos + k;
-					user.allPlaylists[playlist.id].tracks[nextNum] = {
-						place: nextNum,
-						id: albumDetails.items[k].id,
-						album: albumDetails.name,
-					};
-				}
+				// for (var k = 0; k < albumDetails.total; k++) {
+				// 	let nextNum = firstTrackPos + k;
+				// 	user.allPlaylists[playlist.id].tracks[nextNum] = {
+				// 		place: nextNum,
+				// 		id: albumDetails.items[k].id,
+				// 		album: albumDetails.name,
+				// 	};
+				// }
 			} catch (err) {
 				console.log(err);
 			}
 		}
 
-		user.progress.done++;
-		user.progress.percent = (user.progress.done / user.progress.total) * 100;
+		updateProgress();
 		delayms += APIdelay;
 		await delay(delayms);
 	}
+	// Retreive all modified playlists again from spotify to ensure they are up to date.
+	updateLocalPlaylists();
+	resetProgress();
+}
+
+export async function updateLocalPlaylists() {
+	// Loop through all playlists, getting the data
+	resetProgress();
+	let delayms = 0;
+	for (var i = 0; i < user.selectedPlaylists.length; i++) {
+		const id = user.selectedPlaylists[i].id;
+		const [newTracks, newAlbums, newAlbumList] = await getPlaylistDetails(id);
+		user.allPlaylists[id].tracks = newTracks;
+		user.allPlaylists[id].albums = newAlbums;
+		user.allPlaylists[id].albumList = newAlbumList;
+
+		updateProgress();
+		delayms += APIdelay;
+		await delay(delayms);
+	}
+}
+
+export async function getPlaylistDetails(id) {
+	let nextLink;
+	let APItracks = [];
+	let tracks = {};
+	let albums = {};
+	let albumList = '';
+	do {
+		let res = await axios.get(nextLink || `https://api.spotify.com/v1/playlists/${id}/tracks?fields=`, {
+			headers: {
+				Authorization: 'Bearer ' + user.token,
+			},
+		});
+		console.log(res);
+		APItracks = APItracks.concat(res.data.items);
+		nextLink = res.data.next;
+	} while (nextLink);
+
+	for (const i in APItracks) {
+		const track = APItracks[i].track;
+		tracks[i] = { place: i, id: track.id, album: track.album.name };
+		if (albums.hasOwnProperty(track.album.name)) {
+			albums[track.album.name].trackCount += 1;
+		} else {
+			albums[track.album.name] = { name: track.album.name, trackCount: 0 };
+			albumList += ', ' + track.album.name;
+		}
+	}
+
+	albumList = albumList.substring(2);
+
+	return [tracks, albums, albumList];
 }
 
 export async function getAllUserPlaylists() {
@@ -118,6 +174,16 @@ export async function getAllUserPlaylists() {
 	// 		localStorage.setItem('user-playlists', JSON.stringify(playlistsCopy));
 	// 	}
 	// }
+}
+
+function resetProgress() {
+	user.progress.done = 0;
+	user.progress.total = user.selectedPlaylists.length;
+	user.progress.percent = 0;
+}
+function updateProgress() {
+	user.progress.done++;
+	user.progress.percent = (user.progress.done / user.progress.total) * 100;
 }
 
 async function delay(ms) {
