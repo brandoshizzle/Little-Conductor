@@ -1,6 +1,10 @@
 import React, { forwardRef, useEffect } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 import MaterialTable from 'material-table';
+import Chip from '@material-ui/core/Chip';
 import axios from 'axios';
+
+import * as api from './../api';
 
 import { view } from '@risingstack/react-easy-state';
 import { playlistArray, user } from './../store';
@@ -41,8 +45,22 @@ const tableIcons = {
 	ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />),
 };
 
+const useStyles = makeStyles((theme) => ({
+	root: {
+		display: 'flex',
+		justifyContent: 'center',
+		flexWrap: 'wrap',
+		listStyle: 'none',
+		padding: theme.spacing(0.5),
+		margin: 0,
+	},
+	chip: {
+		margin: theme.spacing(0.5),
+	},
+}));
+
 const PlaylistTable = (props) => {
-	const { token } = props;
+	const classes = useStyles();
 
 	// Get data from storage or API on launch
 	useEffect(() => {
@@ -59,7 +77,10 @@ const PlaylistTable = (props) => {
 				for (const i in playlistBatch) {
 					let playlist = playlistBatch[i];
 					if (playlist.owner.id === user.id) {
-						if (!user.allPlaylists.hasOwnProperty(playlist.id)) {
+						if (
+							!user.allPlaylists.hasOwnProperty(playlist.id) &&
+							user.filteredPlaylists.indexOf(playlist.id) > -1
+						) {
 							user.allPlaylists[playlist.id] = {
 								id: playlist.id,
 								name: playlist.name,
@@ -68,7 +89,7 @@ const PlaylistTable = (props) => {
 								description: decodeURIComponent(playlist.description),
 								tracks: {},
 								albumList: 'Loading...',
-								albums: {},
+								albums: [],
 							};
 						}
 					}
@@ -82,11 +103,16 @@ const PlaylistTable = (props) => {
 				let playlist = user.allPlaylists[i];
 				if (playlist.albumList === 'Loading...') {
 					await delay(currentDelay);
-					const [newTracks, newAlbums, newAlbumList] = await getTracksAndAlbums(playlist.id);
+					const [newTracks, newAlbums] = await api.getPlaylistTracksAndAlbums(playlist.id, user.allAlbums);
 					// console.log(newTracks, newAlbums, newAlbumList);
-					user.allPlaylists[playlist.id].tracks = newTracks;
-					user.allPlaylists[playlist.id].albums = newAlbums;
-					user.allPlaylists[playlist.id].albumList = newAlbumList;
+					if (newTracks) {
+						user.allPlaylists[playlist.id].tracks = newTracks;
+						user.allPlaylists[playlist.id].albums = newAlbums;
+					} else {
+						user.filteredPlaylists.push(playlist.id);
+						delete user.allPlaylists[playlist.id];
+					}
+
 					// currentDelay += delayIncrement;
 				}
 			}
@@ -95,44 +121,16 @@ const PlaylistTable = (props) => {
 		loadTable();
 	}, []);
 
-	async function getTracksAndAlbums(id, delayms) {
-		let nextLink;
-		let APItracks = [];
-		let tracks = {};
-		let albums = {};
-		let albumList = '';
-		do {
-			let res = await axios.get(nextLink || `https://api.spotify.com/v1/playlists/${id}/tracks?fields=`, {
-				headers: {
-					Authorization: 'Bearer ' + token,
-				},
-			});
-			console.log(res);
-			APItracks = APItracks.concat(res.data.items);
-			nextLink = res.data.next;
-		} while (nextLink);
-
-		for (const i in APItracks) {
-			const track = APItracks[i].track;
-			tracks[i] = { place: i, id: track.id, album: track.album.name };
-			if (albums.hasOwnProperty(track.album.name)) {
-				albums[track.album.name].trackCount += 1;
-			} else {
-				albums[track.album.name] = { name: track.album.name, trackCount: 0 };
-				albumList += ', ' + track.album.name;
-			}
-		}
-
-		albumList = albumList.substring(2);
-
-		return [tracks, albums, albumList];
-	}
-
 	async function delay(ms) {
 		await timeout(ms);
 	}
 
 	const timeout = (ms) => new Promise((res) => setTimeout(res, ms));
+
+	function handleDelete(name) {
+		// Remove album from playlist
+		console.log(name);
+	}
 
 	return (
 		<div style={{ maxWidth: '100%' }}>
@@ -140,7 +138,30 @@ const PlaylistTable = (props) => {
 				columns={[
 					{ title: 'Name', field: 'name', width: 250 },
 					{ title: 'Description', field: 'description', width: 300 },
-					{ title: 'Albums', field: 'albumList' },
+					{
+						title: 'Albums',
+						field: 'albums',
+						render: (rowData) => {
+							// console.log(rowData);
+							return (
+								<div className={classes.root}>
+									{rowData.albums &&
+										rowData.albums.map((name) => {
+											return (
+												<Chip
+													key={name}
+													label={name}
+													onDelete={() => {
+														handleDelete(name);
+													}}
+													className={classes.chip}
+												/>
+											);
+										})}
+								</div>
+							);
+						},
+					},
 				]}
 				data={playlistArray()}
 				icons={tableIcons}

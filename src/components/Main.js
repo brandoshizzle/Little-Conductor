@@ -87,6 +87,7 @@ const Main = (props) => {
 	if (error) {
 		return (
 			<div>
+				<p>If you're seeing this, click this button.</p>
 				<Button
 					variant="contained"
 					color="primary"

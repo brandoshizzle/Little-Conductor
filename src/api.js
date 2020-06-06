@@ -41,7 +41,7 @@ export async function addAlbums(side) {
 							uris: trackURIs,
 					  };
 			try {
-				let res = await axios.post(`https://api.spotify.com/v1/playlists/${playlist.id}/tracks`, data, {
+				await axios.post(`https://api.spotify.com/v1/playlists/${playlist.id}/tracks`, data, {
 					headers: {
 						Authorization: 'Bearer ' + user.token,
 						'Content-Type': 'application/json',
@@ -67,10 +67,9 @@ export async function updateLocalPlaylistTracks() {
 	let delayms = 0;
 	for (var i = 0; i < user.selectedPlaylists.length; i++) {
 		const id = user.selectedPlaylists[i].id;
-		const [newTracks, newAlbums, newAlbumList] = await getPlaylistTracks(id);
+		const [newTracks, newAlbums] = await getPlaylistTracksAndAlbums(id);
 		user.allPlaylists[id].tracks = newTracks;
 		user.allPlaylists[id].albums = newAlbums;
-		user.allPlaylists[id].albumList = newAlbumList;
 		updateProgress();
 		delayms += APIdelay;
 		await delay(delayms);
@@ -108,37 +107,41 @@ export async function replaceDescription(description) {
 	resetProgress();
 }
 
-export async function getPlaylistTracks(id) {
+export async function getPlaylistTracksAndAlbums(id, albumsObj) {
 	let nextLink;
 	let APItracks = [];
 	let tracks = {};
-	let albums = {};
-	let albumList = '';
+	let albums = [];
+	let hasLSAlbum = false;
 	do {
 		let res = await axios.get(nextLink || `https://api.spotify.com/v1/playlists/${id}/tracks?fields=`, {
 			headers: {
 				Authorization: 'Bearer ' + user.token,
 			},
 		});
-		console.log(res);
+		// console.log(res);
 		APItracks = APItracks.concat(res.data.items);
 		nextLink = res.data.next;
 	} while (nextLink);
 
+	console.log(albumsObj);
 	for (const i in APItracks) {
 		const track = APItracks[i].track;
 		tracks[i] = { place: i, id: track.id, album: track.album.name };
-		if (albums.hasOwnProperty(track.album.name)) {
-			albums[track.album.name].trackCount += 1;
-		} else {
-			albums[track.album.name] = { name: track.album.name, trackCount: 0 };
-			albumList += ', ' + track.album.name;
+
+		if (albumsObj.hasOwnProperty(track.album.id)) {
+			hasLSAlbum = true;
+		}
+		if (!albums.includes(track.album.name)) {
+			albums.push(track.album.name);
 		}
 	}
+	// console.log(hasLSAlbum);
+	if (!hasLSAlbum && tracks.length > 0) {
+		tracks = undefined;
+	}
 
-	albumList = albumList.substring(2);
-
-	return [tracks, albums, albumList];
+	return [tracks, albums];
 }
 
 export async function getAllUserPlaylists() {

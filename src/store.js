@@ -1,23 +1,26 @@
 import { store } from '@risingstack/react-easy-state';
 import { observe } from '@nx-js/observer-util';
 
+const defaultUser = {
+	name: '',
+	id: '',
+	token: '',
+	allPlaylists: {},
+	filteredPlaylists: [],
+	selectedAlbums: [],
+	allAlbums: {},
+	selectedPlaylists: [],
+	progress: {
+		done: 0,
+		total: 0,
+		percent: 0,
+	},
+	errors: [],
+};
+
 export const user = localStorage.getItem('user')
-	? store(JSON.parse(localStorage.getItem('user')))
-	: store({
-			name: '',
-			id: '',
-			token: '',
-			allPlaylists: {},
-			selectedAlbums: [],
-			allAlbums: {},
-			selectedPlaylists: [],
-			progress: {
-				done: 0,
-				total: 0,
-				percent: 0,
-			},
-			errors: [],
-	  });
+	? store({ ...defaultUser, ...JSON.parse(localStorage.getItem('user')) })
+	: store(defaultUser);
 
 observe(() => {
 	localStorage.setItem('user', JSON.stringify(user));
