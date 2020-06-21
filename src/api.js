@@ -67,9 +67,10 @@ export async function updateLocalPlaylistTracks() {
 	let delayms = 0;
 	for (var i = 0; i < user.selectedPlaylists.length; i++) {
 		const id = user.selectedPlaylists[i].id;
-		const [newTracks, newAlbums] = await getPlaylistTracksAndAlbums(id);
+		const [newTracks, newAlbums, albumList] = await getPlaylistTracksAndAlbums(id);
 		user.allPlaylists[id].tracks = newTracks;
 		user.allPlaylists[id].albums = newAlbums;
+		user.allPlaylists[id].albumList = albumList;
 		updateProgress();
 		delayms += APIdelay;
 		await delay(delayms);
@@ -107,14 +108,15 @@ export async function replaceDescription(description) {
 	resetProgress();
 }
 
-export async function getPlaylistTracksAndAlbums(id, albumsObj) {
+export async function getPlaylistTracksAndAlbums(album_id) {
 	let nextLink;
 	let APItracks = [];
 	let tracks = {};
 	let albums = [];
+	let albumList = '';
 	let hasLSAlbum = false;
 	do {
-		let res = await axios.get(nextLink || `https://api.spotify.com/v1/playlists/${id}/tracks?fields=`, {
+		let res = await axios.get(nextLink || `https://api.spotify.com/v1/playlists/${album_id}/tracks?fields=`, {
 			headers: {
 				Authorization: 'Bearer ' + user.token,
 			},
@@ -124,16 +126,17 @@ export async function getPlaylistTracksAndAlbums(id, albumsObj) {
 		nextLink = res.data.next;
 	} while (nextLink);
 
-	console.log(albumsObj);
 	for (const i in APItracks) {
 		const track = APItracks[i].track;
 		tracks[i] = { place: i, id: track.id, album: track.album.name };
 
-		if (albumsObj.hasOwnProperty(track.album.id)) {
+		if (user.allAlbums.hasOwnProperty(track.album.id)) {
 			hasLSAlbum = true;
 		}
-		if (!albums.includes(track.album.name)) {
+		if (albums.indexOf(track.album.name) === -1) {
+			// albums.push({ id: track.album.id, name: track.album.name });
 			albums.push(track.album.name);
+			albumList += track.album.name + ', ';
 		}
 	}
 	// console.log(hasLSAlbum);
@@ -141,7 +144,7 @@ export async function getPlaylistTracksAndAlbums(id, albumsObj) {
 		tracks = undefined;
 	}
 
-	return [tracks, albums];
+	return [tracks, albums, albumList.substring(0, albumList.length - 2)];
 }
 
 export async function getAllUserPlaylists() {

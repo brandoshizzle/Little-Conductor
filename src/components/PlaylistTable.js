@@ -3,6 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import MaterialTable from 'material-table';
 import Chip from '@material-ui/core/Chip';
 import axios from 'axios';
+import { ReactSortable } from 'react-sortablejs';
 
 import * as api from './../api';
 
@@ -79,7 +80,7 @@ const PlaylistTable = (props) => {
 					if (playlist.owner.id === user.id) {
 						if (
 							!user.allPlaylists.hasOwnProperty(playlist.id) &&
-							user.filteredPlaylists.indexOf(playlist.id) > -1
+							user.filteredPlaylists.indexOf(playlist.id) === -1
 						) {
 							user.allPlaylists[playlist.id] = {
 								id: playlist.id,
@@ -103,11 +104,12 @@ const PlaylistTable = (props) => {
 				let playlist = user.allPlaylists[i];
 				if (playlist.albumList === 'Loading...') {
 					await delay(currentDelay);
-					const [newTracks, newAlbums] = await api.getPlaylistTracksAndAlbums(playlist.id, user.allAlbums);
+					const [newTracks, newAlbums, albumList] = await api.getPlaylistTracksAndAlbums(playlist.id);
 					// console.log(newTracks, newAlbums, newAlbumList);
 					if (newTracks) {
 						user.allPlaylists[playlist.id].tracks = newTracks;
 						user.allPlaylists[playlist.id].albums = newAlbums;
+						user.allPlaylists[playlist.id].albumList = albumList;
 					} else {
 						user.filteredPlaylists.push(playlist.id);
 						delete user.allPlaylists[playlist.id];
@@ -140,27 +142,7 @@ const PlaylistTable = (props) => {
 					{ title: 'Description', field: 'description', width: 300 },
 					{
 						title: 'Albums',
-						field: 'albums',
-						render: (rowData) => {
-							// console.log(rowData);
-							return (
-								<div className={classes.root}>
-									{rowData.albums &&
-										rowData.albums.map((name) => {
-											return (
-												<Chip
-													key={name}
-													label={name}
-													onDelete={() => {
-														handleDelete(name);
-													}}
-													className={classes.chip}
-												/>
-											);
-										})}
-								</div>
-							);
-						},
+						field: 'albumList',
 					},
 				]}
 				data={playlistArray()}
@@ -175,6 +157,7 @@ const PlaylistTable = (props) => {
 					// actionsColumnIndex: -1,
 				}}
 				onSelectionChange={(rows) => (user.selectedPlaylists = rows)}
+				// onRowClick={(event, rowData, togglePanel) => togglePanel()}
 			/>
 		</div>
 	);
