@@ -1,5 +1,6 @@
 import { store } from '@risingstack/react-easy-state';
 import { observe } from '@nx-js/observer-util';
+import merge from 'lodash/merge';
 
 const defaultUser = {
 	name: '',
@@ -15,12 +16,22 @@ const defaultUser = {
 		total: 0,
 		percent: 0,
 	},
+	log: (newLine, color) => {
+		const textColor = color || 'normal';
+		const colors = {
+			start: 'green',
+			normal: '#ddd',
+			end: 'red',
+		};
+		user.logArray.unshift({ text: newLine, color: colors[textColor] });
+	},
+	logArray: [],
 	errors: [],
 };
 
-export const user = localStorage.getItem('user')
-	? store({ ...defaultUser, ...JSON.parse(localStorage.getItem('user')) })
-	: store(defaultUser);
+export const user = store(
+	localStorage.getItem('user') != null ? merge(defaultUser, JSON.parse(localStorage.getItem('user'))) : defaultUser
+);
 
 observe(() => {
 	localStorage.setItem('user', JSON.stringify(user));

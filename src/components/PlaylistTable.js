@@ -67,14 +67,16 @@ const PlaylistTable = (props) => {
 	useEffect(() => {
 		async function loadTable() {
 			let nextLink;
+			user.log(`Fetching all of ${user.name}'s playlists`);
 			do {
 				let res = await axios.get(nextLink || `https://api.spotify.com/v1/me/playlists?limit=50`, {
 					headers: {
 						Authorization: 'Bearer ' + user.token,
 					},
 				});
-				console.log(res);
+				// console.log(res);
 				let playlistBatch = res.data.items;
+				user.log(`Retrieved ${res.data.items.length} playlists`);
 				for (const i in playlistBatch) {
 					let playlist = playlistBatch[i];
 					if (playlist.owner.id === user.id) {
@@ -111,6 +113,7 @@ const PlaylistTable = (props) => {
 						user.allPlaylists[playlist.id].albums = newAlbums;
 						user.allPlaylists[playlist.id].albumList = albumList;
 					} else {
+						user.log(`${playlist.name} was not relaxing enough.`);
 						user.filteredPlaylists.push(playlist.id);
 						delete user.allPlaylists[playlist.id];
 					}

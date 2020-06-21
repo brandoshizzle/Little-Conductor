@@ -4,11 +4,14 @@ import axios from 'axios';
 const APIdelay = 300;
 
 export async function addAlbums(side) {
-	console.log('Go time!');
 	resetProgress();
 	let albumDetails = [];
 	let delayms = 0;
 	let trackURIs = [];
+	user.log(
+		`It's time to add ${user.selectedAlbums.length} albums to the ${side} of ${user.selectedPlaylists.length} playlists`,
+		'start'
+	);
 	for (var i = 0; i < user.selectedAlbums.length; i++) {
 		// console.log(user.selectedAlbums);
 		let res = await axios.get(`https://api.spotify.com/v1/albums/${user.selectedAlbums[i]}/tracks`, {
@@ -17,7 +20,8 @@ export async function addAlbums(side) {
 			},
 		});
 		albumDetails = albumDetails.concat(res.data);
-		console.log(albumDetails);
+		user.log(`Grabbing track info for ${user.allAlbums[user.selectedAlbums[i]].name}`);
+		// console.log(albumDetails);
 		for (var cha = 0; cha < albumDetails[i].total; cha++) {
 			trackURIs.push(albumDetails[i].items[cha].uri);
 		}
@@ -47,7 +51,9 @@ export async function addAlbums(side) {
 						'Content-Type': 'application/json',
 					},
 				});
+				user.log(`Successfully plopped ${trackURIs.length} beats onto ${playlist.name}.`);
 			} catch (err) {
+				user.log(`Houston, we had an issue with ${playlist.name}...`);
 				console.log(err);
 			}
 		}
@@ -59,6 +65,7 @@ export async function addAlbums(side) {
 	// Retreive all modified playlists again from spotify to ensure they are up to date.
 	updateLocalPlaylistTracks();
 	resetProgress();
+	user.log(`All finished big guy.`, 'end');
 }
 
 export async function updateLocalPlaylistTracks() {
@@ -78,14 +85,14 @@ export async function updateLocalPlaylistTracks() {
 }
 
 export async function replaceDescription(description) {
-	console.log('Go time!');
 	resetProgress();
 	let delayms = 0;
-
+	user.log(`Description time! Changing the description of ${user.selectedPlaylists.length} playlists.`, 'start');
 	// Go through each playlist and replace the description
 	for (var j = 0; j < user.selectedPlaylists.length; j++) {
 		const playlist = user.selectedPlaylists[j];
 		let data = { description };
+
 		try {
 			let res = await axios.put(`https://api.spotify.com/v1/playlists/${playlist.id}/`, data, {
 				headers: {
@@ -95,9 +102,11 @@ export async function replaceDescription(description) {
 			});
 			// If successful, update local
 			if (res.status === 200) {
+				user.log(`Bam. Description of ${user.selectedPlaylists[j].name} updated.`);
 				user.allPlaylists[playlist.id].description = description;
 			}
 		} catch (err) {
+			user.log(`Uh oh! There was an issue with .`);
 			console.log(err);
 		}
 
@@ -106,6 +115,7 @@ export async function replaceDescription(description) {
 		await delay(delayms);
 	}
 	resetProgress();
+	user.log(`We're done here.`, 'end');
 }
 
 export async function getPlaylistTracksAndAlbums(album_id) {
@@ -126,6 +136,7 @@ export async function getPlaylistTracksAndAlbums(album_id) {
 		nextLink = res.data.next;
 	} while (nextLink);
 
+	console.log(user.allAlbums);
 	for (const i in APItracks) {
 		const track = APItracks[i].track;
 		tracks[i] = { place: i, id: track.id, album: track.album.name };
@@ -133,14 +144,15 @@ export async function getPlaylistTracksAndAlbums(album_id) {
 		if (user.allAlbums.hasOwnProperty(track.album.id)) {
 			hasLSAlbum = true;
 		}
-		if (albums.indexOf(track.album.name) === -1) {
-			// albums.push({ id: track.album.id, name: track.album.name });
-			albums.push(track.album.name);
+
+		if (albumList.indexOf(track.album.name) === -1) {
+			albums.push({ id: track.album.id, name: track.album.name });
+			// albums.push(track.album.name);
 			albumList += track.album.name + ', ';
 		}
 	}
-	// console.log(hasLSAlbum);
-	if (!hasLSAlbum && tracks.length > 0) {
+
+	if (!hasLSAlbum && Object.entries(tracks).length > 0) {
 		tracks = undefined;
 	}
 

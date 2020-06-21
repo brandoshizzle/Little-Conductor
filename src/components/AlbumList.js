@@ -31,6 +31,7 @@ const AlbumList = (props) => {
 	useEffect(() => {
 		async function loadAlbums() {
 			let nextLink;
+			user.log('Getting LS albums...');
 			do {
 				let res = await axios.get(
 					nextLink ||
@@ -49,9 +50,11 @@ const AlbumList = (props) => {
 				}
 				nextLink = res.data.next;
 			} while (nextLink);
+			user.log(`Loaded ${Object.values(user.allAlbums).length} albums`);
 		}
 		// Get all LS albums
 		loadAlbums();
+		user.selectedAlbums = [];
 	}, []);
 
 	const handleListItemClick = (event, id) => {

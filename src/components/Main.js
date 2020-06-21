@@ -11,6 +11,7 @@ import { view } from '@risingstack/react-easy-state';
 import { user } from './../store';
 
 import PlaylistAlbumsPage from './PlaylistAlbumsPage';
+import Logger from './Logger';
 
 function TabPanel(props) {
 	const { children, value, index, ...other } = props;
@@ -68,12 +69,15 @@ const Main = (props) => {
 	if (user.id !== '') {
 		return (
 			<div className={classes.root}>
-				<AppBar position="static">
+				{/* <div style={{ display: 'flex' }}> */}
+				<AppBar position="static" style={{ width: '50%' }}>
 					<Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
 						<Tab label="Playlist Albums" {...a11yProps(0)} />
 						<Tab label="Nothing... for now" {...a11yProps(1)} />
 					</Tabs>
 				</AppBar>
+				<Logger />
+				{/* </div> */}
 				<TabPanel value={value} index={0}>
 					<PlaylistAlbumsPage token={token} />
 				</TabPanel>
@@ -87,7 +91,7 @@ const Main = (props) => {
 	if (error) {
 		return (
 			<div>
-				<p>If you're seeing this, click this button.</p>
+				<p>If you're seeing this, click this button, then refresh the page.</p>
 				<Button
 					variant="contained"
 					color="primary"
