@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import useAxios from 'axios-hooks';
+import React, { useState } from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import AppBar from "@material-ui/core/AppBar";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
+import Box from "@material-ui/core/Box";
+import Button from "@material-ui/core/Button";
+import useAxios from "axios-hooks";
 
-import { view } from '@risingstack/react-easy-state';
-import { user } from './../store';
+import { view } from "@risingstack/react-easy-state";
+import { user } from "./../store";
 
-import PlaylistAlbumsPage from './PlaylistAlbumsPage';
-import Logger from './Logger';
+import PlaylistAlbumsPage from "./PlaylistAlbumsPage";
+import Logger from "./Logger";
 
 function TabPanel(props) {
 	const { children, value, index, ...other } = props;
@@ -22,8 +22,7 @@ function TabPanel(props) {
 			hidden={value !== index}
 			id={`simple-tabpanel-${index}`}
 			aria-labelledby={`simple-tab-${index}`}
-			{...other}
-		>
+			{...other}>
 			{value === index && <Box p={3}>{children}</Box>}
 		</div>
 	);
@@ -32,13 +31,14 @@ function TabPanel(props) {
 function a11yProps(index) {
 	return {
 		id: `simple-tab-${index}`,
-		'aria-controls': `simple-tabpanel-${index}`,
+		"aria-controls": `simple-tabpanel-${index}`,
 	};
 }
 
 const useStyles = makeStyles((theme) => ({
 	root: {
 		flexGrow: 1,
+		height: "calc(100vh - 48px)",
 		// backgroundColor: theme.palette.background.paper,
 	},
 }));
@@ -49,10 +49,10 @@ const Main = (props) => {
 	const [value, setValue] = useState(0);
 
 	const [{ data, loading, error }, refetch] = useAxios({
-		url: 'https://api.spotify.com/v1/me',
-		method: 'GET',
+		url: "https://api.spotify.com/v1/me",
+		method: "GET",
 		headers: {
-			Authorization: 'Bearer ' + token,
+			Authorization: "Bearer " + token,
 		},
 	});
 
@@ -66,19 +66,22 @@ const Main = (props) => {
 		setValue(newValue);
 	};
 
-	if (user.id !== '') {
+	if (user.id !== "") {
 		return (
 			<div className={classes.root}>
 				{/* <div style={{ display: 'flex' }}> */}
-				<AppBar position="static" style={{ width: '50%' }}>
-					<Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
+				<AppBar position="static" style={{ width: "50%" }}>
+					<Tabs
+						value={value}
+						onChange={handleChange}
+						aria-label="simple tabs example">
 						<Tab label="Playlist Albums" {...a11yProps(0)} />
 						<Tab label="Nothing... for now" {...a11yProps(1)} />
 					</Tabs>
 				</AppBar>
 				<Logger />
 				{/* </div> */}
-				<TabPanel value={value} index={0}>
+				<TabPanel value={value} index={0} style={{ height: "100%" }}>
 					<PlaylistAlbumsPage token={token} />
 				</TabPanel>
 				<TabPanel value={value} index={1}>
@@ -91,14 +94,16 @@ const Main = (props) => {
 	if (error) {
 		return (
 			<div>
-				<p>If you're seeing this, click this button, then refresh the page.</p>
+				<p>
+					If you're seeing this, click this button, then refresh the
+					page.
+				</p>
 				<Button
 					variant="contained"
 					color="primary"
 					onClick={() => {
-						localStorage.setItem('token', '');
-					}}
-				>
+						localStorage.setItem("token", "");
+					}}>
 					Clear Token
 				</Button>
 			</div>

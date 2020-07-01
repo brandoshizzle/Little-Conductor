@@ -1,39 +1,39 @@
-import React, { useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
-import * as api from './../api';
-import LinearProgress from '@material-ui/core/LinearProgress';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
+import React, { useState } from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import Button from "@material-ui/core/Button";
+import * as api from "./../api";
+import LinearProgress from "@material-ui/core/LinearProgress";
+import TextField from "@material-ui/core/TextField";
+import Typography from "@material-ui/core/Typography";
 
-import { view } from '@risingstack/react-easy-state';
-import { user } from './../store';
+import { view } from "@risingstack/react-easy-state";
+import { user } from "./../store";
 
 const useStyles = makeStyles((theme) => ({
 	bg: {
 		background: theme.palette.background.paper,
 	},
 	root: {
-		display: 'flex',
-		flexWrap: 'wrap',
-		justifyContent: 'flex-start',
+		display: "flex",
+		flexWrap: "wrap",
+		justifyContent: "flex-start",
 	},
 	item: {
 		margin: 5,
 	},
 	progressBox: {
-		width: '100%',
-		display: 'flex',
-		alignItems: 'center',
+		width: "100%",
+		display: "flex",
+		alignItems: "center",
 	},
 	progress: {
-		flexGrow: '1',
+		flexGrow: "1",
 	},
 }));
 
 const ActionButtons = (props) => {
 	const classes = useStyles();
-	const [desc, setDesc] = useState('');
+	const [desc, setDesc] = useState("");
 
 	function descChange(e) {
 		setDesc(e.target.value);
@@ -43,22 +43,27 @@ const ActionButtons = (props) => {
 		<div>
 			<div className={classes.root}>
 				<div className={classes.progressBox}>
-					<Typography variant="body1">Current Task</Typography>
+					{/* <Typography variant="body1">Current Task</Typography> */}
 					<LinearProgress
 						variant="determinate"
 						value={user.progress.percent}
 						color="secondary"
 						className={classes.progress}
+						style={{ display: "none" }}
 					/>
 				</div>
+				<Typography
+					variant="body1"
+					style={{ flexBasis: "100%", paddingTop: 20 }}>
+					Playlists
+				</Typography>
 				<Button
 					variant="contained"
 					color="primary"
 					className={classes.item}
 					onClick={() => {
-						api.addAlbums('start');
-					}}
-				>
+						api.addAlbums("start");
+					}}>
 					Add to start
 				</Button>
 				<Button
@@ -66,22 +71,46 @@ const ActionButtons = (props) => {
 					color="primary"
 					className={classes.item}
 					onClick={() => {
-						api.addAlbums('end');
-					}}
-				>
+						api.addAlbums("end");
+					}}>
 					Add to end
 				</Button>
-				<Button variant="contained" color="primary" className={classes.item}>
+				<div style={{ textAlign: "left" }}>
+					<TextField
+						id="new-description"
+						label="Description"
+						onChange={descChange}
+						style={{ width: "60%" }}
+					/>
+					<Button
+						variant="contained"
+						color="primary"
+						className={classes.item}
+						onClick={() => {
+							api.replaceDescription(desc);
+						}}>
+						Replace
+					</Button>
+				</div>
+				{/* <Button
+					variant="contained"
+					color="primary"
+					className={classes.item}>
 					Add to start and push last album
-				</Button>
+				</Button> */}
+
+				<Typography
+					variant="body1"
+					style={{ flexBasis: "100%", paddingTop: 20 }}>
+					Utility
+				</Typography>
 				<Button
 					variant="contained"
 					color="primary"
 					className={classes.item}
 					onClick={() => {
-						localStorage.setItem('token', '');
-					}}
-				>
+						localStorage.setItem("token", "");
+					}}>
 					Clear Token
 				</Button>
 				<Button
@@ -89,23 +118,9 @@ const ActionButtons = (props) => {
 					color="primary"
 					className={classes.item}
 					onClick={() => {
-						localStorage.removeItem('user');
-					}}
-				>
+						localStorage.removeItem("user");
+					}}>
 					Reload all playlists
-				</Button>
-			</div>
-			<div style={{ textAlign: 'left' }}>
-				<TextField id="new-description" label="Description" onChange={descChange} style={{ width: '60%' }} />
-				<Button
-					variant="contained"
-					color="primary"
-					className={classes.item}
-					onClick={() => {
-						api.replaceDescription(desc);
-					}}
-				>
-					Replace description
 				</Button>
 			</div>
 		</div>
