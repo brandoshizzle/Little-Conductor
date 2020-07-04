@@ -107,6 +107,8 @@ const PlaylistTable = (props) => {
 								tracks: {},
 								albumList: "Loading...",
 								albums: [],
+								lastUpdated: "Loading...",
+								playlistMilliseconds: "Loading...",
 							};
 						}
 					}
@@ -124,12 +126,20 @@ const PlaylistTable = (props) => {
 						newTracks,
 						newAlbums,
 						albumList,
+						lastUpdated,
+						playlistMilliseconds,
 					] = await api.getPlaylistTracksAndAlbums(playlist.id);
 					// console.log(newTracks, newAlbums, newAlbumList);
 					if (newTracks) {
 						user.allPlaylists[playlist.id].tracks = newTracks;
 						user.allPlaylists[playlist.id].albums = newAlbums;
 						user.allPlaylists[playlist.id].albumList = albumList;
+						user.allPlaylists[
+							playlist.id
+						].lastUpdated = lastUpdated;
+						user.allPlaylists[
+							playlist.id
+						].playlistMilliseconds = playlistMilliseconds;
 					} else {
 						user.log(`${playlist.name} was not relaxing enough.`);
 						user.filteredPlaylists.push(playlist.id);
@@ -161,6 +171,37 @@ const PlaylistTable = (props) => {
 				columns={[
 					{ title: "Name", field: "name", width: 250 },
 					{ title: "Description", field: "description", width: 300 },
+					{
+						title: "Total length",
+						field: "playlistMilliseconds",
+						render: (rowData) => {
+							const ms = rowData.playlistMilliseconds;
+							if (ms === "Loading...") {
+								return "Loading...";
+							}
+							var d, h, m, s;
+							s = Math.floor(ms / 1000);
+							m = Math.floor(s / 60);
+							s = s % 60;
+							h = Math.floor(m / 60);
+							m = m % 60;
+							d = Math.floor(h / 24);
+							h = h % 24;
+							h += d * 24;
+							return `${h}:${m}:${s}`;
+						},
+					},
+					{
+						title: "Last updated",
+						field: "lastUpdated",
+						width: 150,
+						render: (rowData) => {
+							const now = Date.now().toString();
+							return `${Math.floor(
+								(now - rowData.lastUpdated) / 86400000
+							)} days ago`;
+						},
+					},
 					{
 						title: "Albums",
 						field: "albumList",

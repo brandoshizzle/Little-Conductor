@@ -5,6 +5,7 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import Avatar from "@material-ui/core/Avatar";
+import Typography from "@material-ui/core/Typography";
 // import useAxios from 'axios-hooks';
 import axios from "axios";
 import { view } from "@risingstack/react-easy-state";
@@ -70,6 +71,7 @@ const AlbumList = (props) => {
 
 	return (
 		<div className={classes.root}>
+			<Typography variant="body1">LS Albums</Typography>
 			<List
 				className={classes.list}
 				component="nav"

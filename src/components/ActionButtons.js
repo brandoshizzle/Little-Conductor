@@ -55,7 +55,7 @@ const ActionButtons = (props) => {
 				<Typography
 					variant="body1"
 					style={{ flexBasis: "100%", paddingTop: 20 }}>
-					Playlists
+					Album Actions
 				</Typography>
 				<Button
 					variant="contained"
@@ -75,6 +75,11 @@ const ActionButtons = (props) => {
 					}}>
 					Add to end
 				</Button>
+				<Typography
+					variant="body1"
+					style={{ flexBasis: "100%", paddingTop: 20 }}>
+					Playlist Actions
+				</Typography>
 				<div style={{ textAlign: "left" }}>
 					<TextField
 						id="new-description"

@@ -75,8 +75,8 @@ const Main = (props) => {
 						value={value}
 						onChange={handleChange}
 						aria-label="simple tabs example">
-						<Tab label="Playlist Albums" {...a11yProps(0)} />
-						<Tab label="Nothing... for now" {...a11yProps(1)} />
+						<Tab label="Playlist Tools" {...a11yProps(0)} />
+						<Tab label="Utilities" {...a11yProps(1)} />
 					</Tabs>
 				</AppBar>
 				<Logger />
