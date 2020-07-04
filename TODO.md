@@ -7,7 +7,6 @@
 -   Input list of playlist urls from sheets and give back list of followers to paste back
 -   Having the ability to paste in a column of playlist links and follow all of the ones I am currently not already following
 -   Replace playlist albums
--
 
 ## Maybe later
 

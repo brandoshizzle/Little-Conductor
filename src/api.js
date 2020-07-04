@@ -8,12 +8,19 @@ export async function addAlbums(side) {
 	let albumDetails = [];
 	let delayms = 0;
 	let trackURIs = [];
+	let newAlbumsString = ", ";
+	let addedTime = 0;
+	let newAlbumsList = [];
 	user.log(
 		`It's time to add ${user.selectedAlbums.length} albums to the ${side} of ${user.selectedPlaylists.length} playlists`,
 		"start"
 	);
 	for (var i = 0; i < user.selectedAlbums.length; i++) {
-		// console.log(user.selectedAlbums);
+		user.log(
+			`Grabbing track info for ${
+				user.allAlbums[user.selectedAlbums[i]].name
+			}`
+		);
 		let res = await axios.get(
 			`https://api.spotify.com/v1/albums/${user.selectedAlbums[i]}/tracks`,
 			{
@@ -23,14 +30,12 @@ export async function addAlbums(side) {
 			}
 		);
 		albumDetails = albumDetails.concat(res.data);
-		user.log(
-			`Grabbing track info for ${
-				user.allAlbums[user.selectedAlbums[i]].name
-			}`
-		);
+		newAlbumsString += `${user.allAlbums[user.selectedAlbums[i]].name}, `;
+		newAlbumsList.push(user.allAlbums[user.selectedAlbums[i]]);
 		// console.log(albumDetails);
 		for (var cha = 0; cha < albumDetails[i].total; cha++) {
 			trackURIs.push(albumDetails[i].items[cha].uri);
+			addedTime += albumDetails[i].items[cha].duration_ms;
 		}
 	}
 	// console.log(trackURIs);
@@ -52,7 +57,7 @@ export async function addAlbums(side) {
 							uris: trackURIs,
 					  };
 			try {
-				await axios.post(
+				let res = await axios.post(
 					`https://api.spotify.com/v1/playlists/${playlist.id}/tracks`,
 					data,
 					{
@@ -62,9 +67,36 @@ export async function addAlbums(side) {
 						},
 					}
 				);
-				user.log(
-					`Successfully plopped ${trackURIs.length} beats onto ${playlist.name}.`
-				);
+				// If successful, update local
+				console.log(res);
+				if (res.status === 201) {
+					user.log(
+						`Successfully plopped ${trackURIs.length} beats onto ${playlist.name}.`
+					);
+					// Update list of albums
+					if (side === "start") {
+						user.allPlaylists[playlist.id].albumList =
+							newAlbumsString.substring(2) +
+							user.allPlaylists[playlist.id].albumList;
+					} else {
+						user.allPlaylists[playlist.id].albumList =
+							user.allPlaylists[playlist.id].albumList +
+							newAlbumsString.substring(
+								0,
+								newAlbumsString.length - 2
+							);
+					}
+					// Update total time
+					user.allPlaylists[
+						playlist.id
+					].playlistMilliseconds += addedTime;
+					// Update lastUpdated
+					user.allPlaylists[
+						playlist.id
+					].lastUpdated = Date.now().toString();
+					// Update albums array
+					user.allPlaylists[playlist.id].albums.concat(newAlbumsList);
+				}
 			} catch (err) {
 				user.log(`Houston, we had an issue with ${playlist.name}...`);
 				console.log(err);
@@ -82,27 +114,27 @@ export async function addAlbums(side) {
 }
 
 export async function updateLocalPlaylistTracks() {
-	// Loop through all playlists, getting the data
-	resetProgress();
-	let delayms = 0;
-	for (var i = 0; i < user.selectedPlaylists.length; i++) {
-		const id = user.selectedPlaylists[i].id;
-		const [
-			newTracks,
-			newAlbums,
-			albumList,
-			lastUpdated,
-			playlistMilliseconds,
-		] = await getPlaylistTracksAndAlbums(id);
-		user.allPlaylists[id].tracks = newTracks;
-		user.allPlaylists[id].albums = newAlbums;
-		user.allPlaylists[id].albumList = albumList;
-		user.allPlaylists[id].lastUpdated = lastUpdated;
-		user.allPlaylists[id].playlistMilliseconds = playlistMilliseconds;
-		updateProgress();
-		delayms += APIdelay;
-		await delay(delayms);
-	}
+	// // Loop through all playlists, getting the data
+	// resetProgress();
+	// let delayms = 0;
+	// for (var i = 0; i < user.selectedPlaylists.length; i++) {
+	// 	const id = user.selectedPlaylists[i].id;
+	// 	const [
+	// 		newTracks,
+	// 		newAlbums,
+	// 		albumList,
+	// 		lastUpdated,
+	// 		playlistMilliseconds,
+	// 	] = await getPlaylistTracksAndAlbums(id);
+	// 	user.allPlaylists[id].tracks = newTracks;
+	// 	user.allPlaylists[id].albums = newAlbums;
+	// 	user.allPlaylists[id].albumList = albumList;
+	// 	user.allPlaylists[id].lastUpdated = lastUpdated;
+	// 	user.allPlaylists[id].playlistMilliseconds = playlistMilliseconds;
+	// 	updateProgress();
+	// 	delayms += APIdelay;
+	// 	await delay(delayms);
+	// }
 }
 
 export async function replaceDescription(description) {
@@ -172,7 +204,6 @@ export async function getPlaylistTracksAndAlbums(album_id) {
 		nextLink = res.data.next;
 	} while (nextLink);
 
-	console.log(user.allAlbums);
 	for (const i in APItracks) {
 		const track = APItracks[i].track;
 		tracks[i] = { place: i, id: track.id, album: track.album.name };
@@ -189,7 +220,6 @@ export async function getPlaylistTracksAndAlbums(album_id) {
 
 		if (albumList.indexOf(track.album.name) === -1) {
 			albums.push({ id: track.album.id, name: track.album.name });
-			// albums.push(track.album.name);
 			albumList += track.album.name + ", ";
 		}
 	}
@@ -202,56 +232,6 @@ export async function getPlaylistTracksAndAlbums(album_id) {
 	albumList = albumList.substring(0, albumList.length - 2);
 
 	return [tracks, albums, albumList, lastUpdated, playlistMilliseconds];
-}
-
-export async function getAllUserPlaylists() {
-	// let nextLink;
-	// let newPlaylistsFromAPI = [];
-	// do {
-	// 	let res = await axios.get(nextLink || `https://api.spotify.com/v1/me/playlists?limit=50`, {
-	// 		headers: {
-	// 			Authorization: 'Bearer ' + token,
-	// 		},
-	// 	});
-	// 	console.log(res);
-	// 	let playlistBatch = res.data.items;
-	// 	for (const i in playlistBatch) {
-	// 		let playlist = playlistBatch[i];
-	// 		if (playlist.owner.id === user.id) {
-	// 			let dupe = playlists.find((element) => element.id === playlist.id);
-	// 			if (dupe === undefined) {
-	// 				newPlaylistsFromAPI.push({
-	// 					id: playlist.id,
-	// 					name: playlist.name,
-	// 					url: playlist.external_urls.spotify,
-	// 					tracks_endpoint: playlist.tracks.href,
-	// 					tracks: {},
-	// 					albumList: 'Loading...',
-	// 					albums: {},
-	// 				});
-	// 			}
-	// 		}
-	// 	}
-	// 	nextLink = res.data.next;
-	// } while (nextLink);
-	// const newList = [...playlists].concat(newPlaylistsFromAPI);
-	// setPlaylists(newList);
-	// localStorage.setItem('user-playlists', JSON.stringify(newList));
-	// const delayIncrement = 300;
-	// let currentDelay = -delayIncrement;
-	// for (const i in playlists) {
-	// 	let playlist = playlists[i];
-	// 	if (playlist.albumList === 'Loading...') {
-	// 		const [newTracks, newAlbums, newAlbumList] = await getTracksAndAlbums(playlist.id, currentDelay);
-	// 		console.log(newTracks, newAlbums, newAlbumList);
-	// 		let playlistsCopy = [...playlists];
-	// 		playlistsCopy[i].tracks = newTracks;
-	// 		playlistsCopy[i].albums = newAlbums;
-	// 		playlistsCopy[i].albumList = newAlbumList;
-	// 		setPlaylists(playlistsCopy);
-	// 		localStorage.setItem('user-playlists', JSON.stringify(playlistsCopy));
-	// 	}
-	// }
 }
 
 function resetProgress() {
