@@ -8,6 +8,9 @@
 # testing
 /coverage
 
+# Invoices
+/Invoices
+
 # production
 /build
 

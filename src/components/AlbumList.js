@@ -23,6 +23,11 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
+Object.filter = (obj, predicate) =>
+	Object.keys(obj)
+		.filter((key) => predicate(obj[key]))
+		.reduce((res, key) => ((res[key] = obj[key]), res), {});
+
 const AlbumList = (props) => {
 	const classes = useStyles();
 	const { token } = props;
@@ -52,6 +57,7 @@ const AlbumList = (props) => {
 				nextLink = res.data.next;
 			} while (nextLink);
 			user.log(`Loaded ${Object.values(user.allAlbums).length} albums`);
+			console.log(user.allAlbums);
 		}
 		// Get all LS albums
 		loadAlbums();
@@ -71,13 +77,57 @@ const AlbumList = (props) => {
 
 	return (
 		<div className={classes.root}>
-			<Typography variant="body1">LS Albums</Typography>
+			<Typography variant="body1">Releases</Typography>
 			<List
 				className={classes.list}
 				component="nav"
 				aria-label="main mailbox folders">
+				<Typography variant="body1">Albums</Typography>
 				{user.allAlbums &&
-					Object.values(user.allAlbums).map((album, i) => {
+					Object.values(
+						Object.filter(
+							user.allAlbums,
+							(album) => album.album_type === "album"
+						)
+					).map((album, i) => {
+						const rDate = new Date(album.release_date);
+						return (
+							<ListItem
+								button
+								selected={
+									user.selectedAlbums.indexOf(album.id) > -1
+								}
+								onClick={(event) =>
+									handleListItemClick(event, album.id)
+								}
+								key={album.id}>
+								<ListItemAvatar>
+									<Avatar
+										variant="square"
+										src={album.images[1].url}></Avatar>
+								</ListItemAvatar>
+								<ListItemText
+									primary={album.name}
+									secondary={rDate.toLocaleDateString(
+										"en-US",
+										{
+											year: "numeric",
+											month: "long",
+											day: "numeric",
+										}
+									)}
+								/>
+							</ListItem>
+						);
+					})}
+				<Typography variant="body1">Singles</Typography>
+				{user.allAlbums &&
+					Object.values(
+						Object.filter(
+							user.allAlbums,
+							(album) => album.album_type === "single"
+						)
+					).map((album, i) => {
 						const rDate = new Date(album.release_date);
 						return (
 							<ListItem

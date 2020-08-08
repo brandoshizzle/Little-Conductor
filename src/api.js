@@ -96,6 +96,7 @@ export async function addAlbums(side) {
 					].lastUpdated = Date.now().toString();
 					// Update albums array
 					user.allPlaylists[playlist.id].albums.concat(newAlbumsList);
+					// 	user.allPlaylists[id].tracks = newTracks;
 				}
 			} catch (err) {
 				user.log(`Houston, we had an issue with ${playlist.name}...`);
@@ -107,34 +108,8 @@ export async function addAlbums(side) {
 		delayms += APIdelay;
 		await delay(delayms);
 	}
-	// Retreive all modified playlists again from spotify to ensure they are up to date.
-	updateLocalPlaylistTracks();
-	resetProgress();
-	user.log(`All finished big guy.`, "end");
-}
 
-export async function updateLocalPlaylistTracks() {
-	// // Loop through all playlists, getting the data
-	// resetProgress();
-	// let delayms = 0;
-	// for (var i = 0; i < user.selectedPlaylists.length; i++) {
-	// 	const id = user.selectedPlaylists[i].id;
-	// 	const [
-	// 		newTracks,
-	// 		newAlbums,
-	// 		albumList,
-	// 		lastUpdated,
-	// 		playlistMilliseconds,
-	// 	] = await getPlaylistTracksAndAlbums(id);
-	// 	user.allPlaylists[id].tracks = newTracks;
-	// 	user.allPlaylists[id].albums = newAlbums;
-	// 	user.allPlaylists[id].albumList = albumList;
-	// 	user.allPlaylists[id].lastUpdated = lastUpdated;
-	// 	user.allPlaylists[id].playlistMilliseconds = playlistMilliseconds;
-	// 	updateProgress();
-	// 	delayms += APIdelay;
-	// 	await delay(delayms);
-	// }
+	user.log(`All finished big guy.`, "end");
 }
 
 export async function replaceDescription(description) {
