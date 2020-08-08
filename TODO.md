@@ -1,12 +1,12 @@
 ## To Do
 
--   Add n first, push last n
--   Reorder albums by dragging
--   Don't add any albums that exist on the playlist already
--   Add tags to playlists (?)
--   Input list of playlist urls from sheets and give back list of followers to paste back
--   Having the ability to paste in a column of playlist links and follow all of the ones I am currently not already following
--   Replace playlist albums
+-   Add n first, push last n (1.5 hours)
+-   Reorder albums by dragging (2 hours)
+-   Don't add any albums that exist on the playlist already (0.3 hours)
+-   Add tags to playlists (4 hours)
+-   Input list of playlist urls from sheets and give back list of followers to paste back (2 hours)
+-   Having the ability to paste in a column of playlist links and follow all of the ones I am currently not already following (1.5 hour)
+-   Replace playlist albums (0.5 hours)
 
 ## Maybe later
 
