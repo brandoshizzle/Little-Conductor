@@ -1,34 +1,28 @@
-import { user } from "./store";
-import axios from "axios";
+import { user } from './store';
+import axios from 'axios';
 
 const APIdelay = 300;
 
-export async function addAlbums(side) {
+export async function addAlbums(side, replaceArg) {
 	resetProgress();
+	const replace = replaceArg === 'replace' ? true : false;
 	let albumDetails = [];
 	let delayms = 0;
 	let trackURIs = [];
-	let newAlbumsString = ", ";
+	let newAlbumsString = ', ';
 	let addedTime = 0;
 	let newAlbumsList = [];
 	user.log(
 		`It's time to add ${user.selectedAlbums.length} albums to the ${side} of ${user.selectedPlaylists.length} playlists`,
-		"start"
+		'start'
 	);
 	for (var i = 0; i < user.selectedAlbums.length; i++) {
-		user.log(
-			`Grabbing track info for ${
-				user.allAlbums[user.selectedAlbums[i]].name
-			}`
-		);
-		let res = await axios.get(
-			`https://api.spotify.com/v1/albums/${user.selectedAlbums[i]}/tracks`,
-			{
-				headers: {
-					Authorization: "Bearer " + user.token,
-				},
-			}
-		);
+		user.log(`Grabbing track info for ${user.allAlbums[user.selectedAlbums[i]].name}`);
+		let res = await axios.get(`https://api.spotify.com/v1/albums/${user.selectedAlbums[i]}/tracks`, {
+			headers: {
+				Authorization: 'Bearer ' + user.token,
+			},
+		});
 		albumDetails = albumDetails.concat(res.data);
 		newAlbumsString += `${user.allAlbums[user.selectedAlbums[i]].name}, `;
 		newAlbumsList.push(user.allAlbums[user.selectedAlbums[i]]);
@@ -48,7 +42,7 @@ export async function addAlbums(side) {
 		// if (playlist.albumList.indexOf(user.album.name) === -1) {
 		if (true) {
 			let data =
-				side === "start"
+				side === 'start'
 					? {
 							uris: trackURIs,
 							position: 0,
@@ -57,43 +51,29 @@ export async function addAlbums(side) {
 							uris: trackURIs,
 					  };
 			try {
-				let res = await axios.post(
-					`https://api.spotify.com/v1/playlists/${playlist.id}/tracks`,
-					data,
-					{
-						headers: {
-							Authorization: "Bearer " + user.token,
-							"Content-Type": "application/json",
-						},
-					}
-				);
+				let res = await axios.post(`https://api.spotify.com/v1/playlists/${playlist.id}/tracks`, data, {
+					headers: {
+						Authorization: 'Bearer ' + user.token,
+						'Content-Type': 'application/json',
+					},
+				});
 				// If successful, update local
 				console.log(res);
 				if (res.status === 201) {
-					user.log(
-						`Successfully plopped ${trackURIs.length} beats onto ${playlist.name}.`
-					);
+					user.log(`Successfully plopped ${trackURIs.length} beats onto ${playlist.name}.`);
 					// Update list of albums
-					if (side === "start") {
+					if (side === 'start') {
 						user.allPlaylists[playlist.id].albumList =
-							newAlbumsString.substring(2) +
-							user.allPlaylists[playlist.id].albumList;
+							newAlbumsString.substring(2) + user.allPlaylists[playlist.id].albumList;
 					} else {
 						user.allPlaylists[playlist.id].albumList =
 							user.allPlaylists[playlist.id].albumList +
-							newAlbumsString.substring(
-								0,
-								newAlbumsString.length - 2
-							);
+							newAlbumsString.substring(0, newAlbumsString.length - 2);
 					}
 					// Update total time
-					user.allPlaylists[
-						playlist.id
-					].playlistMilliseconds += addedTime;
+					user.allPlaylists[playlist.id].playlistMilliseconds += addedTime;
 					// Update lastUpdated
-					user.allPlaylists[
-						playlist.id
-					].lastUpdated = Date.now().toString();
+					user.allPlaylists[playlist.id].lastUpdated = Date.now().toString();
 					// Update albums array
 					user.allPlaylists[playlist.id].albums.concat(newAlbumsList);
 					// 	user.allPlaylists[id].tracks = newTracks;
@@ -109,37 +89,30 @@ export async function addAlbums(side) {
 		await delay(delayms);
 	}
 
-	user.log(`All finished big guy.`, "end");
+	user.log(`All finished big guy.`, 'end');
 }
+
+export async function refreshAlbums() {}
 
 export async function replaceDescription(description) {
 	resetProgress();
 	let delayms = 0;
-	user.log(
-		`Description time! Changing the description of ${user.selectedPlaylists.length} playlists.`,
-		"start"
-	);
+	user.log(`Description time! Changing the description of ${user.selectedPlaylists.length} playlists.`, 'start');
 	// Go through each playlist and replace the description
 	for (var j = 0; j < user.selectedPlaylists.length; j++) {
 		const playlist = user.selectedPlaylists[j];
 		let data = { description };
 
 		try {
-			let res = await axios.put(
-				`https://api.spotify.com/v1/playlists/${playlist.id}/`,
-				data,
-				{
-					headers: {
-						Authorization: "Bearer " + user.token,
-						"Content-Type": "application/json",
-					},
-				}
-			);
+			let res = await axios.put(`https://api.spotify.com/v1/playlists/${playlist.id}/`, data, {
+				headers: {
+					Authorization: 'Bearer ' + user.token,
+					'Content-Type': 'application/json',
+				},
+			});
 			// If successful, update local
 			if (res.status === 200) {
-				user.log(
-					`Bam. Description of ${user.selectedPlaylists[j].name} updated.`
-				);
+				user.log(`Bam. Description of ${user.selectedPlaylists[j].name} updated.`);
 				user.allPlaylists[playlist.id].description = description;
 			}
 		} catch (err) {
@@ -152,7 +125,7 @@ export async function replaceDescription(description) {
 		await delay(delayms);
 	}
 	resetProgress();
-	user.log(`We're done here.`, "end");
+	user.log(`We're done here.`, 'end');
 }
 
 export async function getPlaylistTracksAndAlbums(album_id) {
@@ -160,20 +133,16 @@ export async function getPlaylistTracksAndAlbums(album_id) {
 	let APItracks = [];
 	let tracks = {};
 	let albums = [];
-	let albumList = "";
-	let lastUpdated = Date.parse("1980-01-01T12:00:00Z");
+	let albumList = '';
+	let lastUpdated = Date.parse('1980-01-01T12:00:00Z');
 	let playlistMilliseconds = 0;
 	let hasLSAlbum = false;
 	do {
-		let res = await axios.get(
-			nextLink ||
-				`https://api.spotify.com/v1/playlists/${album_id}/tracks?fields=`,
-			{
-				headers: {
-					Authorization: "Bearer " + user.token,
-				},
-			}
-		);
+		let res = await axios.get(nextLink || `https://api.spotify.com/v1/playlists/${album_id}/tracks?fields=`, {
+			headers: {
+				Authorization: 'Bearer ' + user.token,
+			},
+		});
 		// console.log(res);
 		APItracks = APItracks.concat(res.data.items);
 		nextLink = res.data.next;
@@ -195,7 +164,7 @@ export async function getPlaylistTracksAndAlbums(album_id) {
 
 		if (albumList.indexOf(track.album.name) === -1) {
 			albums.push({ id: track.album.id, name: track.album.name });
-			albumList += track.album.name + ", ";
+			albumList += track.album.name + ', ';
 		}
 	}
 

@@ -5,6 +5,7 @@ import Paper from '@material-ui/core/Paper';
 
 import { view } from '@risingstack/react-easy-state';
 import { user } from './../store';
+import { Avatar, Tooltip } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -33,12 +34,15 @@ const AlbumChips = () => {
 
 				return (
 					<li key={index}>
-						<Chip
-							icon={icon}
-							label={user.allAlbums[albumID].name}
-							onDelete={handleDelete(albumID)}
-							className={classes.chip}
-						/>
+						<Tooltip title={user.allAlbums[albumID].name} placement="top">
+							<Chip
+								// label={user.allAlbums[albumID].name}
+								onClick={handleDelete(albumID)}
+								className={classes.chip}
+								size="small"
+								avatar={<Avatar src={user.allAlbums[albumID].images[1].url} />}
+							/>
+						</Tooltip>
 					</li>
 				);
 			})}

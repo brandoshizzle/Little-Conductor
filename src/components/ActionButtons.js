@@ -1,39 +1,41 @@
-import React, { useState } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import * as api from "./../api";
-import LinearProgress from "@material-ui/core/LinearProgress";
-import TextField from "@material-ui/core/TextField";
-import Typography from "@material-ui/core/Typography";
+import React, { useState } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+import * as api from './../api';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
 
-import { view } from "@risingstack/react-easy-state";
-import { user } from "./../store";
+import { view } from '@risingstack/react-easy-state';
+import { user } from './../store';
 
 const useStyles = makeStyles((theme) => ({
 	bg: {
 		background: theme.palette.background.paper,
 	},
 	root: {
-		display: "flex",
-		flexWrap: "wrap",
-		justifyContent: "flex-start",
+		display: 'flex',
+		flexWrap: 'wrap',
+		justifyContent: 'flex-start',
 	},
 	item: {
-		margin: 5,
+		margin: 0,
+		marginRight: 2,
+		marginBottom: 2,
 	},
 	progressBox: {
-		width: "100%",
-		display: "flex",
-		alignItems: "center",
+		width: '100%',
+		display: 'flex',
+		alignItems: 'center',
 	},
 	progress: {
-		flexGrow: "1",
+		flexGrow: '1',
 	},
 }));
 
 const ActionButtons = (props) => {
 	const classes = useStyles();
-	const [desc, setDesc] = useState("");
+	const [desc, setDesc] = useState('');
 
 	function descChange(e) {
 		setDesc(e.target.value);
@@ -49,43 +51,66 @@ const ActionButtons = (props) => {
 						value={user.progress.percent}
 						color="secondary"
 						className={classes.progress}
-						style={{ display: "none" }}
+						style={{ display: 'none' }}
 					/>
 				</div>
-				<Typography
-					variant="body1"
-					style={{ flexBasis: "100%", paddingTop: 20 }}>
-					Album Actions
+				<Typography variant="body1" style={{ flexBasis: '100%', paddingTop: 5 }}>
+					Add Albums to
 				</Typography>
 				<Button
 					variant="contained"
 					color="primary"
 					className={classes.item}
 					onClick={() => {
-						api.addAlbums("start");
-					}}>
-					Add to start
+						api.addAlbums('start');
+					}}
+					size="small"
+				>
+					start
 				</Button>
 				<Button
 					variant="contained"
 					color="primary"
 					className={classes.item}
 					onClick={() => {
-						api.addAlbums("end");
-					}}>
-					Add to end
+						api.addAlbums('end');
+					}}
+					size="small"
+				>
+					end
 				</Button>
-				<Typography
-					variant="body1"
-					style={{ flexBasis: "100%", paddingTop: 20 }}>
+				<Button
+					variant="contained"
+					color="primary"
+					className={classes.item}
+					onClick={() => {
+						api.addAlbums('start', 'replace');
+					}}
+					size="small"
+				>
+					Replace
+				</Button>
+				<Button
+					variant="contained"
+					color="primary"
+					className={classes.item}
+					onClick={() => {
+						api.refreshAlbums();
+					}}
+					size="small"
+				>
+					refresh
+				</Button>
+				<Typography variant="body1" style={{ flexBasis: '100%', paddingTop: 5 }}>
 					Playlist Actions
 				</Typography>
-				<div style={{ textAlign: "left" }}>
-					<TextField
+				<div style={{ textAlign: 'left' }}>
+					<input
 						id="new-description"
-						label="Description"
+						placeholder="Description"
 						onChange={descChange}
-						style={{ width: "60%" }}
+						style={{ width: '120px', padding: 5 }}
+						type="text"
 					/>
 					<Button
 						variant="contained"
@@ -93,7 +118,9 @@ const ActionButtons = (props) => {
 						className={classes.item}
 						onClick={() => {
 							api.replaceDescription(desc);
-						}}>
+						}}
+						size="small"
+					>
 						Replace
 					</Button>
 				</div>
@@ -104,9 +131,7 @@ const ActionButtons = (props) => {
 					Add to start and push last album
 				</Button> */}
 
-				<Typography
-					variant="body1"
-					style={{ flexBasis: "100%", paddingTop: 20 }}>
+				<Typography variant="body1" style={{ flexBasis: '100%', paddingTop: 5 }}>
 					Utility
 				</Typography>
 				<Button
@@ -114,8 +139,10 @@ const ActionButtons = (props) => {
 					color="primary"
 					className={classes.item}
 					onClick={() => {
-						localStorage.setItem("token", "");
-					}}>
+						localStorage.setItem('token', '');
+					}}
+					size="small"
+				>
 					Clear Token
 				</Button>
 				<Button
@@ -123,9 +150,11 @@ const ActionButtons = (props) => {
 					color="primary"
 					className={classes.item}
 					onClick={() => {
-						localStorage.removeItem("user");
-					}}>
-					Reload all playlists
+						localStorage.removeItem('user');
+					}}
+					size="small"
+				>
+					RESET
 				</Button>
 			</div>
 		</div>
