@@ -17,6 +17,8 @@
 -   Clicking on playlist title opens up new tab/window directing to the playlist URL
 -   Instead of checkmark in checkbox, something rude and offensive like a butt or penis or something
 -   Colours: dark greens, browns, hints of blue - It would be nice if it felt naturesque
+-   Unique checkbox
+-   Fart sounds when actions are done
 
 ## Maybe later
 
