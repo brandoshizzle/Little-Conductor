@@ -8,16 +8,13 @@
 6. Add n first, push last n (1.5 hours)
 7. Add tags to playlists (4 hours)
 
-
 ## UI
+
 -   Make left pannel ~1/2 the size so the right pannel stretches out causing each row to take up less vertical real estate
--   Bold header row (i.e. "Name", "Description" etc.)
--   Bold Playlist name
--   Make description text a few points smaller and potentially italicize? In general it would be nice if each playlist takes up ~1/2 the vertical space
+-   Click to expand description
 -   Clicking on playlist title opens up new tab/window directing to the playlist URL
 -   Instead of checkmark in checkbox, something rude and offensive like a butt or penis or something
 -   Colours: dark greens, browns, hints of blue - It would be nice if it felt naturesque
--   Unique checkbox
 -   Fart sounds when actions are done
 
 ## Maybe later
@@ -32,3 +29,5 @@
 -   In-UI console
 -   Playlist last update (in days)
 -   Playlist length (in time)
+-   Bold header row (i.e. "Name", "Description" etc.)
+-   Bold Playlist name
