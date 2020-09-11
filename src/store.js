@@ -6,7 +6,7 @@ const defaultUser = {
 	name: "",
 	id: "",
 	token: "",
-	allPlaylists: {},
+	allPlaylists: [],
 	filteredPlaylists: [],
 	selectedAlbums: [],
 	allAlbums: {},
@@ -19,15 +19,34 @@ const defaultUser = {
 	log: (newLine, color) => {
 		const textColor = color || "normal";
 		const colors = {
-			start: "green",
+			start: "cornflowerblue",
 			normal: "#ddd",
-			end: "red",
+			end: "lightgreen",
+			error: "red",
 		};
-		user.logArray.unshift({ text: newLine, color: colors[textColor] });
+		const logline = "> " + newLine;
+		user.logArray.push({ text: logline, color: colors[textColor] });
+		var logEl = document.getElementById("logger");
+		logEl.scrollTop = logEl.scrollHeight + 50;
 	},
 	logArray: [],
 	errors: [],
 };
+
+export function addPlaylist(playlistData) {
+	user.allPlaylists.push({
+		id: playlistData.id,
+		name: playlistData.name,
+		url: playlistData.external_urls.spotify,
+		tracks_endpoint: playlistData.tracks.href,
+		description: decodeURIComponent(playlistData.description),
+		tracks: playlistData.tracks,
+		albumsString: playlistData.albumsString,
+		albums: playlistData.albums,
+		lastUpdated: playlistData.lastUpdated,
+		playlistMilliseconds: playlistData.playlistMilliseconds,
+	});
+}
 
 export const user = store(
 	localStorage.getItem("user") != null
@@ -38,18 +57,5 @@ export const user = store(
 observe(() => {
 	localStorage.setItem("user", JSON.stringify(user));
 });
-
-export function playlistArray() {
-	let test = [];
-	for (var playlist in user.allPlaylists) {
-		const newObj = {
-			...user.allPlaylists[playlist],
-		};
-		test.push(newObj);
-	}
-	// playlistArray = Object.values(user.allPlaylists);
-	// console.log(test);
-	return test;
-}
 
 window.user = user;

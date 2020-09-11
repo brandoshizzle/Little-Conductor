@@ -1,196 +1,48 @@
-<<<<<<< HEAD
 import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
-// import MaterialTable from "material-table";
+import Tooltip from "@material-ui/core/Tooltip";
 import ReactDataGrid from "react-data-grid";
-// import Chip from '@material-ui/core/Chip';
-import axios from "axios";
-// import { ReactSortable } from 'react-sortablejs';
-=======
-import React, { forwardRef, useEffect } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import MaterialTable from "material-table";
-import Chip from "@material-ui/core/Chip";
-import axios from "axios";
-import { ReactSortable } from "react-sortablejs";
->>>>>>> master
-
 import * as api from "./../api";
 
 import { view } from "@risingstack/react-easy-state";
-import { playlistArray, user } from "./../store";
-<<<<<<< HEAD
+import { user } from "./../store";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
-		fontSize: 16,
-=======
-
-import AddBox from "@material-ui/icons/AddBox";
-import ArrowDownward from "@material-ui/icons/ArrowDownward";
-import Check from "@material-ui/icons/Check";
-import ChevronLeft from "@material-ui/icons/ChevronLeft";
-import ChevronRight from "@material-ui/icons/ChevronRight";
-import Clear from "@material-ui/icons/Clear";
-import DeleteOutline from "@material-ui/icons/DeleteOutline";
-import Edit from "@material-ui/icons/Edit";
-import FilterList from "@material-ui/icons/FilterList";
-import FirstPage from "@material-ui/icons/FirstPage";
-import LastPage from "@material-ui/icons/LastPage";
-import Remove from "@material-ui/icons/Remove";
-import SaveAlt from "@material-ui/icons/SaveAlt";
-import Search from "@material-ui/icons/Search";
-import ViewColumn from "@material-ui/icons/ViewColumn";
-import { Typography, emphasize } from "@material-ui/core";
-
-const tableIcons = {
-	Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
-	Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
-	Clear: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
-	Delete: forwardRef((props, ref) => <DeleteOutline {...props} ref={ref} />),
-	DetailPanel: forwardRef((props, ref) => (
-		<ChevronRight {...props} ref={ref} />
-	)),
-	Edit: forwardRef((props, ref) => <Edit {...props} ref={ref} />),
-	Export: forwardRef((props, ref) => <SaveAlt {...props} ref={ref} />),
-	Filter: forwardRef((props, ref) => <FilterList {...props} ref={ref} />),
-	FirstPage: forwardRef((props, ref) => <FirstPage {...props} ref={ref} />),
-	LastPage: forwardRef((props, ref) => <LastPage {...props} ref={ref} />),
-	NextPage: forwardRef((props, ref) => <ChevronRight {...props} ref={ref} />),
-	PreviousPage: forwardRef((props, ref) => (
-		<ChevronLeft {...props} ref={ref} />
-	)),
-	ResetSearch: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
-	Search: forwardRef((props, ref) => <Search {...props} ref={ref} />),
-	SortArrow: forwardRef((props, ref) => (
-		<ArrowDownward {...props} ref={ref} />
-	)),
-	ThirdStateCheck: forwardRef((props, ref) => (
-		<Remove {...props} ref={ref} />
-	)),
-	ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />),
-};
-
-const useStyles = makeStyles((theme) => ({
-	root: {
-		display: "flex",
-		justifyContent: "center",
-		flexWrap: "wrap",
-		listStyle: "none",
-		padding: theme.spacing(0.5),
-		margin: 0,
-	},
-	chip: {
-		margin: theme.spacing(0.5),
->>>>>>> master
+		fontSize: 14,
 	},
 }));
+
+const sortRows = (initialRows, sortColumn, sortDirection) => (rows) => {
+	const comparer = (a, b) => {
+		if (sortDirection === "ASC") {
+			return a[sortColumn] > b[sortColumn] ? 1 : -1;
+		} else if (sortDirection === "DESC") {
+			return a[sortColumn] < b[sortColumn] ? 1 : -1;
+		}
+	};
+	return sortDirection === "NONE" ? initialRows : [...rows].sort(comparer);
+};
 
 const PlaylistTable = (props) => {
 	const classes = useStyles();
 
-	const [selectedIndexes, setSelectedIndexes] = useState([]);
+	const [tableWidth, setTableWidth] = useState(500);
+	const [rows, setRows] = useState(user.allPlaylists);
 
-	// Get data from storage or API on launch
 	useEffect(() => {
-		async function loadTable() {
-			let nextLink;
-			user.log(`Fetching all of ${user.name}'s playlists`);
-			do {
-				let res = await axios.get(
-					nextLink ||
-						`https://api.spotify.com/v1/me/playlists?limit=50`,
-					{
-						headers: {
-							Authorization: "Bearer " + user.token,
-						},
-					}
-				);
-				// console.log(res);
-				let playlistBatch = res.data.items;
-				user.log(`Retrieved ${res.data.items.length} playlists`);
-				for (const i in playlistBatch) {
-					let playlist = playlistBatch[i];
-					if (playlist.owner.id === user.id) {
-						if (
-							!user.allPlaylists.hasOwnProperty(playlist.id) &&
-							user.filteredPlaylists.indexOf(playlist.id) === -1
-						) {
-							user.allPlaylists[playlist.id] = {
-								id: playlist.id,
-								name: playlist.name,
-								url: playlist.external_urls.spotify,
-								tracks_endpoint: playlist.tracks.href,
-								description: decodeURIComponent(
-									playlist.description
-								),
-<<<<<<< HEAD
-								tracks: {},
-=======
-								tracks: [],
->>>>>>> master
-								albumList: "Loading...",
-								albums: [],
-								lastUpdated: "Loading...",
-								playlistMilliseconds: "Loading...",
-							};
-						}
-					}
-				}
-				nextLink = res.data.next;
-			} while (nextLink);
-
-			const delayIncrement = 300;
-			let currentDelay = -delayIncrement;
-			for (const i in user.allPlaylists) {
-				let playlist = user.allPlaylists[i];
-				if (playlist.albumList === "Loading...") {
-					await delay(currentDelay);
-					const [
-						newTracks,
-						newAlbums,
-						albumList,
-						lastUpdated,
-						playlistMilliseconds,
-					] = await api.getPlaylistTracksAndAlbums(playlist.id);
-					// console.log(newTracks, newAlbums, newAlbumList);
-					if (newTracks) {
-						user.allPlaylists[playlist.id].tracks = newTracks;
-						user.allPlaylists[playlist.id].albums = newAlbums;
-						user.allPlaylists[playlist.id].albumList = albumList;
-						user.allPlaylists[
-							playlist.id
-						].lastUpdated = lastUpdated;
-						user.allPlaylists[
-							playlist.id
-						].playlistMilliseconds = playlistMilliseconds;
-					} else {
-						user.log(`${playlist.name} was not relaxing enough.`);
-						user.filteredPlaylists.push(playlist.id);
-						delete user.allPlaylists[playlist.id];
-					}
-
-					// currentDelay += delayIncrement;
-				}
-			}
-		}
-		// Get all user's playlists first, then determine if we need additional API calls
-		loadTable();
+		// Get data from storage or API on launch
+		const w = window.innerWidth;
+		setTableWidth(w - 520);
+		window.addEventListener("resize", function () {
+			const w = window.innerWidth;
+			setTableWidth(w - 520);
+		});
+		api.loadTable();
 	}, []);
 
-	async function delay(ms) {
-		await timeout(ms);
-	}
-
-	const timeout = (ms) => new Promise((res) => setTimeout(res, ms));
-
-	function handleDelete(name) {
-		// Remove album from playlist
-		console.log(name);
-	}
-
 	const playlistLengthFormatter = ({ value }) => {
-		console.log(value);
+		// console.log(value);
 		var ms = parseInt(value);
 		var d, h, m, s;
 		s = Math.floor(ms / 1000);
@@ -201,248 +53,97 @@ const PlaylistTable = (props) => {
 		d = Math.floor(h / 24);
 		h = h % 24;
 		h += d * 24;
-		return `${h}:${m < 10 ? "0" + m : m}:${s < 10 ? "0" + s : s}`;
+		return `${h < 10 ? "0" + h : h}:${m < 10 ? "0" + m : m}:${
+			s < 10 ? "0" + s : s
+		}`;
+	};
+
+	const lastUpdatedFormatter = ({ value }) => {
+		const now = Date.now().toString();
+		const days = Math.floor((now - value) / 86400000);
+		const word = days === 1 ? "day" : "days";
+		return `${days} ${word} ago`;
+	};
+
+	const nameFormatter = ({ value }) => {
+		return (
+			<Tooltip title={value} placement="bottom">
+				<div className="no-overflow">{value}</div>
+			</Tooltip>
+		);
 	};
 
 	const columns = [
-		{ key: "name", name: "Name" },
+		{
+			key: "name",
+			name: "Name",
+			width: 300,
+			sortable: true,
+			resizable: true,
+			formatter: nameFormatter,
+		},
 		{
 			key: "playlistMilliseconds",
 			name: "Total length",
 			formatter: playlistLengthFormatter,
-		},
-		{ key: "lastUpdated", name: "Last updated" },
-		{ key: "albumList", name: "Albums" },
-	];
-
-	const beans = [
-		{
-			name: "Cool",
-			playlistMilliseconds: 500000,
-			lastUpdated: "Yesterday",
-			albumList: "Chill dude",
+			width: 100,
 		},
 		{
-			name: "Cool",
-			playlistMilliseconds: 500000,
-			lastUpdated: "Yesterday",
-			albumList: "Chill dude",
+			key: "lastUpdated",
+			name: "Last updated",
+			formatter: lastUpdatedFormatter,
+			width: 120,
+			sortable: true,
 		},
 		{
-			name: "Cool",
-			playlistMilliseconds: 500000,
-			lastUpdated: "Yesterday",
-			albumList: "Chill dude",
-		},
-		{
-			name: "Cool",
-			playlistMilliseconds: 500000,
-			lastUpdated: "Yesterday",
-			albumList: "Chill dude",
-		},
-		{
-			name: "Cool",
-			playlistMilliseconds: 500000,
-			lastUpdated: "Yesterday",
-			albumList: "Chill dude",
-		},
-		{
-			name: "Cool",
-			playlistMilliseconds: 500000,
-			lastUpdated: "Yesterday",
-			albumList: "Chill dude",
-		},
-		{
-			name: "Cool",
-			playlistMilliseconds: 500000,
-			lastUpdated: "Yesterday",
-			albumList: "Chill dude",
-		},
-		{
-			name: "Cool",
-			playlistMilliseconds: 500000,
-			lastUpdated: "Yesterday",
-			albumList: "Chill dude",
+			key: "albumsString",
+			name: "Albums",
+			resizable: true,
+			formatter: nameFormatter,
 		},
 	];
 
 	function onRowsSelected(rows) {
-		setSelectedIndexes(selectedIndexes.concat(rows.map((r) => r.rowIdx)));
+		console.log(rows);
+		user.selectedPlaylists.push(rows[0].row.id);
+		// setSelectedIds(selectedIds.concat(rows.map((r) => r.row.id)));
 	}
 
 	function onRowsDeselected(rows) {
-		let rowIndexes = rows.map((r) => r.rowIdx);
-		setSelectedIndexes(
-			selectedIndexes.filter((i) => rowIndexes.indexOf(i) === -1)
+		user.selectedPlaylists = user.selectedPlaylists.filter(
+			(e) => e !== rows[0].row.id
 		);
+		// let rowIds = rows.map((r) => r.row.id);
+		// setSelectedIds(selectedIds.filter((i) => rowIds.indexOf(i) === -1));
 	}
 
 	return (
-<<<<<<< HEAD
 		<div className={classes.root}>
 			<ReactDataGrid
 				columns={columns}
-				rowGetter={(i) => beans[i]}
-				rowsCount={beans.length}
+				rowGetter={(i) => rows[i]}
+				rowsCount={rows.length}
 				minHeight={800}
+				minWidth={tableWidth}
 				rowSelection={{
 					showCheckbox: true,
 					enableShiftSelect: true,
 					onRowsSelected: onRowsSelected,
 					onRowsDeselected: onRowsDeselected,
 					selectBy: {
-						indexes: selectedIndexes,
-=======
-		<div style={{ maxWidth: "100%" }}>
-			<MaterialTable
-				columns={[
-					{
-						title: "Name",
-						field: "name",
-						width: 250,
-						render: (rowData) => {
-							return (
-								<div>
-									<Typography variant="body2">
-										<strong>{rowData.name}</strong>
-									</Typography>
-									<Typography variant="subtitle2">
-										<em>{rowData.description}</em>
-									</Typography>
-								</div>
-							);
+						keys: {
+							rowKey: "id",
+							values: user.selectedPlaylists,
 						},
 					},
-					{
-						title: "Total length",
-						field: "playlistMilliseconds",
-						render: (rowData) => {
-							const ms = rowData.playlistMilliseconds;
-							if (ms === "Loading...") {
-								return "Loading...";
-							}
-							var d, h, m, s;
-							s = Math.floor(ms / 1000);
-							m = Math.floor(s / 60);
-							s = s % 60;
-							h = Math.floor(m / 60);
-							m = m % 60;
-							d = Math.floor(h / 24);
-							h = h % 24;
-							h += d * 24;
-							return `${h < 10 ? "0" + h : h}:${
-								m < 10 ? "0" + m : m
-							}:${s < 10 ? "0" + s : s}`;
-						},
-					},
-					{
-						title: "Last updated",
-						field: "lastUpdated",
-						width: 150,
-						render: (rowData) => {
-							const now = Date.now().toString();
-							return `${Math.floor(
-								(now - rowData.lastUpdated) / 86400000
-							)} days ago`;
-						},
-					},
-					{
-						title: "Albums",
-						field: "albumList",
-						width: 600,
-					},
-				]}
-				data={playlistArray()}
-				icons={tableIcons}
-				options={{
-					showTitle: false,
-					selection: true,
-					paging: false,
-					pageSize: 20,
-					// maxBodyHeight: '52vh',
-					draggable: false,
-					headerStyle: {
-						fontWeight: "bold",
->>>>>>> master
-					},
+				}}
+				onGridSort={(sortColumn, sortDirection) => {
+					setRows(
+						sortRows(user.allPlaylists, sortColumn, sortDirection)
+					);
 				}}
 			/>
 		</div>
-		// <div style={{ maxWidth: "100%" }}>
-		// 	<MaterialTable
-		// 		columns={[
-		// 			{
-		// 				title: "Name",
-		// 				field: "name",
-		// 				width: 250,
-		// 				render: (rowData) => {
-		// 					return (
-		// 						<div>
-		// 							<Typography variant="body2">
-		// 								<strong>{rowData.name}</strong>
-		// 							</Typography>
-		// 							<Typography variant="subtitle2">
-		// 								<em>{rowData.description}</em>
-		// 							</Typography>
-		// 						</div>
-		// 					);
-		// 				},
-		// 			},
-		// 			{
-		// 				title: "Total length",
-		// 				field: "playlistMilliseconds",
-		// 				render: (rowData) => {
-		// 					const ms = rowData.playlistMilliseconds;
-		// 					if (ms === "Loading...") {
-		// 						return "Loading...";
-		// 					}
-		// 					var d, h, m, s;
-		// 					s = Math.floor(ms / 1000);
-		// 					m = Math.floor(s / 60);
-		// 					s = s % 60;
-		// 					h = Math.floor(m / 60);
-		// 					m = m % 60;
-		// 					d = Math.floor(h / 24);
-		// 					h = h % 24;
-		// 					h += d * 24;
-		// 					return `${h}:${m}:${s}`;
-		// 				},
-		// 			},
-		// 			{
-		// 				title: "Last updated",
-		// 				field: "lastUpdated",
-		// 				width: 150,
-		// 				render: (rowData) => {
-		// 					const now = Date.now().toString();
-		// 					return `${Math.floor(
-		// 						(now - rowData.lastUpdated) / 86400000
-		// 					)} days ago`;
-		// 				},
-		// 			},
-		// 			{
-		// 				title: "Albums",
-		// 				field: "albumList",
-		// 				width: 600,
-		// 			},
-		// 		]}
-		// 		data={playlistArray()}
-		// 		icons={tableIcons}
-		// 		options={{
-		// 			showTitle: false,
-		// 			selection: true,
-		// 			paging: false,
-		// 			pageSize: 20,
-		// 			// maxBodyHeight: '52vh',
-		// 			draggable: false,
-		// 			headerStyle: {
-		// 				fontWeight: "bold",
-		// 			},
-		// 			// actionsColumnIndex: -1,
-		// 		}}
-		// 		onSelectionChange={(rows) => (user.selectedPlaylists = rows)}
-		// 		// onRowClick={(event, rowData, togglePanel) => togglePanel()}
-		// 	/>
-		// </div>
 	);
 };
 

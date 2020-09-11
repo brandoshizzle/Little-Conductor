@@ -1,13 +1,13 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
 
 import AlbumList from "./AlbumList";
 import PlaylistTable from "./PlaylistTable";
 import ActionButtons from "./ActionButtons";
 import AlbumChips from "./AlbumChips";
+
+import Logger from "./Logger";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -17,7 +17,8 @@ const useStyles = makeStyles((theme) => ({
 		padding: theme.spacing(2),
 		textAlign: "left",
 		color: theme.palette.text.secondary,
-		height: "95vh",
+		height: "calc(100vh - 60px)",
+		backgroundColor: "rgba(240,240,240,0.7)",
 	},
 }));
 
@@ -30,12 +31,12 @@ const PlaylistAlbumsPage = (props) => {
 			<div
 				style={{
 					position: "fixed",
-					height: "100vh",
+					// height: "calc(100vh-60px)",
 					width: sidebarWidth,
-					top: 50,
-					left: 0,
+					top: 55,
+					left: 5,
 				}}>
-				<Paper className={classes.paper}>
+				<Paper className={classes.paper} style={{ padding: 10 }}>
 					<AlbumList token={token} />
 					<AlbumChips />
 					<ActionButtons token={token} />
@@ -50,6 +51,16 @@ const PlaylistAlbumsPage = (props) => {
 					top: 55,
 				}}>
 				<PlaylistTable token={token} />
+			</div>
+			<div
+				style={{
+					position: "fixed",
+					height: "100vh",
+					width: sidebarWidth,
+					top: 50,
+					right: 0,
+				}}>
+				<Logger />
 			</div>
 		</div>
 	);

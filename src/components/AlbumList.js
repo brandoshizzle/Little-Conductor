@@ -1,25 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import Avatar from '@material-ui/core/Avatar';
-import Typography from '@material-ui/core/Typography';
+import React, { useEffect } from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemAvatar from "@material-ui/core/ListItemAvatar";
+import Avatar from "@material-ui/core/Avatar";
+import Typography from "@material-ui/core/Typography";
 // import useAxios from 'axios-hooks';
-import axios from 'axios';
-import { view } from '@risingstack/react-easy-state';
-import { user } from './../store';
+import axios from "axios";
+import { view } from "@risingstack/react-easy-state";
+import { user } from "./../store";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
-		width: '100%',
+		width: "100%",
 		backgroundColor: theme.palette.background.paper,
+		paddingLeft: 10,
 	},
 	list: {
-		position: 'relative',
-		overflow: 'auto',
-		maxHeight: '50vh',
+		position: "relative",
+		overflow: "auto",
+		maxHeight: "50vh",
 	},
 }));
 
@@ -37,20 +38,20 @@ const AlbumList = (props) => {
 	useEffect(() => {
 		async function loadAlbums() {
 			let nextLink;
-			user.log('Getting LS albums...');
+			user.log("Getting LS albums...");
 			do {
 				let res = await axios.get(
 					nextLink ||
-						'https://api.spotify.com/v1/artists/4SCWiQbJCMTHK737aNUqBJ/albums?offset=0&limit=50&market=CA',
+						"https://api.spotify.com/v1/artists/4SCWiQbJCMTHK737aNUqBJ/albums?offset=0&limit=50&market=CA",
 					{
 						headers: {
-							Authorization: 'Bearer ' + token,
+							Authorization: "Bearer " + token,
 						},
 					}
 				);
 				// console.log(res);
 				// albums = albums.concat(res.data.items);
-				console.log(user);
+				// console.log(user);
 				for (var i = 0; i < res.data.items.length; i++) {
 					user.allAlbums[res.data.items[i].id] = res.data.items[i];
 				}
@@ -66,7 +67,9 @@ const AlbumList = (props) => {
 
 	const handleListItemClick = (event, id) => {
 		if (user.selectedAlbums.indexOf(id) > -1) {
-			const newSelectedAlbums = user.selectedAlbums.filter((item) => item !== id);
+			const newSelectedAlbums = user.selectedAlbums.filter(
+				(item) => item !== id
+			);
 			user.selectedAlbums = newSelectedAlbums;
 		} else {
 			user.selectedAlbums = user.selectedAlbums.concat(id);
@@ -75,71 +78,96 @@ const AlbumList = (props) => {
 
 	return (
 		<div className={classes.root}>
-			<List className={classes.list} component="nav" aria-label="main mailbox folders">
+			<List
+				className={classes.list}
+				component="nav"
+				aria-label="main mailbox folders">
 				<Typography variant="body1">Albums</Typography>
 				{user.allAlbums &&
-					Object.values(Object.filter(user.allAlbums, (album) => album.album_type === 'album')).map(
-						(album, i) => {
-							const rDate = new Date(album.release_date);
-							return (
-								<ListItem
-									button
-									selected={user.selectedAlbums.indexOf(album.id) > -1}
-									onClick={(event) => handleListItemClick(event, album.id)}
-									key={album.id}
-									style={{
-										paddingLeft: 0,
-										paddingBottom: 0,
-										paddingTop: 0,
-									}}
-								>
-									<ListItemAvatar>
-										<Avatar variant="square" src={album.images[1].url}></Avatar>
-									</ListItemAvatar>
-									<ListItemText
-										primary={album.name}
-										secondary={rDate.toLocaleDateString('en-US', {
-											year: 'numeric',
-											month: 'long',
-											day: 'numeric',
-										})}
-									/>
-								</ListItem>
-							);
-						}
-					)}
+					Object.values(
+						Object.filter(
+							user.allAlbums,
+							(album) => album.album_type === "album"
+						)
+					).map((album, i) => {
+						const rDate = new Date(album.release_date);
+						return (
+							<ListItem
+								button
+								selected={
+									user.selectedAlbums.indexOf(album.id) > -1
+								}
+								onClick={(event) =>
+									handleListItemClick(event, album.id)
+								}
+								key={album.id}
+								style={{
+									paddingLeft: 0,
+									paddingBottom: 0,
+									paddingTop: 0,
+								}}>
+								<ListItemAvatar>
+									<Avatar
+										variant="square"
+										src={album.images[1].url}></Avatar>
+								</ListItemAvatar>
+								<ListItemText
+									primary={album.name}
+									secondary={rDate.toLocaleDateString(
+										"en-US",
+										{
+											year: "numeric",
+											month: "long",
+											day: "numeric",
+										}
+									)}
+								/>
+							</ListItem>
+						);
+					})}
 				<Typography variant="body1">Singles</Typography>
 				{user.allAlbums &&
-					Object.values(Object.filter(user.allAlbums, (album) => album.album_type === 'single')).map(
-						(album, i) => {
-							const rDate = new Date(album.release_date);
-							return (
-								<ListItem
-									button
-									selected={user.selectedAlbums.indexOf(album.id) > -1}
-									onClick={(event) => handleListItemClick(event, album.id)}
-									key={album.id}
-									style={{
-										paddingLeft: 0,
-										paddingBottom: 0,
-										paddingTop: 0,
-									}}
-								>
-									<ListItemAvatar>
-										<Avatar variant="square" src={album.images[1].url}></Avatar>
-									</ListItemAvatar>
-									<ListItemText
-										primary={album.name}
-										secondary={rDate.toLocaleDateString('en-US', {
-											year: 'numeric',
-											month: 'long',
-											day: 'numeric',
-										})}
-									/>
-								</ListItem>
-							);
-						}
-					)}
+					Object.values(
+						Object.filter(
+							user.allAlbums,
+							(album) => album.album_type === "single"
+						)
+					).map((album, i) => {
+						const rDate = new Date(album.release_date);
+						return (
+							<ListItem
+								button
+								selected={
+									user.selectedAlbums.indexOf(album.id) > -1
+								}
+								onClick={(event) =>
+									handleListItemClick(event, album.id)
+								}
+								key={album.id}
+								style={{
+									paddingLeft: 0,
+									paddingBottom: 0,
+									paddingTop: 0,
+								}}>
+								<ListItemAvatar>
+									<Avatar
+										variant="square"
+										src={album.images[1].url}></Avatar>
+								</ListItemAvatar>
+								<ListItemText
+									primary={album.name}
+									secondary={rDate.toLocaleDateString(
+										"en-US",
+										{
+											year: "numeric",
+											month: "long",
+											day: "numeric",
+										}
+									)}
+								/>
+							</ListItem>
+						);
+					})}
 			</List>
 		</div>
 	);

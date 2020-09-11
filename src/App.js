@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { authEndpoint, clientId, redirectUri, scopes } from "./config";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
-import { green, brown } from "@material-ui/core/colors";
+import Typography from "@material-ui/core/Typography";
 import hash from "./hash";
 import Main from "./components/Main";
 import logo from "./logo.svg";
@@ -60,22 +60,28 @@ class App extends Component {
 			<ThemeProvider theme={LSTheme}>
 				<header>
 					<div className="App">
-						{!this.state.token && (
-							<div className="App-header">
-								<img
-									src={logo}
-									className="App-logo"
-									alt="logo"
-								/>
-								<a
-									className="btn btn--loginApp-link"
-									href={`${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes.join(
-										"%20"
-									)}&response_type=token&show_dialog=true`}>
-									Login to Spotify
-								</a>
-							</div>
-						)}
+						<div className="bg">
+							{!this.state.token && (
+								<div className="App-header">
+									<Typography
+										variant="h1"
+										component="h1"
+										style={{
+											textShadow:
+												"0px 5px 10px rgba(0,0,0,0.9)",
+										}}>
+										Little Conductor
+									</Typography>
+									<a
+										className="btn btn--loginApp-link"
+										href={`${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes.join(
+											"%20"
+										)}&response_type=token&show_dialog=true`}>
+										Login to Spotify
+									</a>
+								</div>
+							)}
+						</div>
 					</div>
 					{this.state.token && <Main token={this.state.token} />}
 				</header>

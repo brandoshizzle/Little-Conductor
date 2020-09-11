@@ -1,7 +1,136 @@
-import { user } from "./store";
+import { user, addPlaylist } from "./store";
 import axios from "axios";
 
 const APIdelay = 300;
+
+export async function loadTable() {
+	let nextLink;
+	user.log(`Fetching all of ${user.name}'s playlists`);
+	// Loop until we get all playlists
+	do {
+		// Get playlists from spotify
+		let res = await axios.get(
+			nextLink || `https://api.spotify.com/v1/me/playlists?limit=50`,
+			{
+				headers: {
+					Authorization: "Bearer " + user.token,
+				},
+			}
+		);
+		// console.log(res);
+		let playlistBatch = res.data.items;
+		user.log(`Retrieved ${res.data.items.length} playlists`);
+
+		// Loop through playlists in that batch
+		for (const i in playlistBatch) {
+			let playlist = playlistBatch[i];
+			// Only get playlists that are owned by the logged in user
+			if (playlist.owner.id === user.id) {
+				// If we already have the playlist in our list for some reason, don't add it
+				if (
+					user.allPlaylists.findIndex((p) => p.id === playlist.id) ===
+						-1 &&
+					user.filteredPlaylists.indexOf(playlist.id) === -1
+				) {
+					// Get track and album details
+					await delay(APIdelay);
+					playlist = await getPlaylistTracks(playlist);
+
+					if (playlist.tracks !== undefined) {
+						// Add it to the store
+						console.log(playlist);
+						addPlaylist(playlist);
+					} else {
+						user.log(`${playlist.name} was not relaxing enough.`);
+						user.filteredPlaylists.push(playlist.id);
+					}
+				}
+			}
+		}
+		// If there's an API link for more, get more
+		nextLink = res.data.next;
+	} while (nextLink);
+}
+
+async function getPlaylistTracks(playlist) {
+	let nextLink;
+	let APItracks = [];
+	let hasLSAlbum = false;
+
+	const newData = {
+		tracks: [],
+		albums: [],
+		albumsString: "",
+		lastUpdated: Date.parse("1980-01-01T12:00:00Z"),
+		playlistMilliseconds: 0,
+	};
+
+	// Get all tracks on the playlist
+	do {
+		let res = await axios.get(
+			nextLink ||
+				`https://api.spotify.com/v1/playlists/${playlist.id}/tracks?fields=`,
+			{
+				headers: {
+					Authorization: "Bearer " + user.token,
+				},
+			}
+		);
+		// console.log(res);
+		APItracks = APItracks.concat(res.data.items);
+		for (const trackData of res.data.items) {
+			if (trackData.track.artists[0].name === "Little Symphony") {
+				hasLSAlbum = true;
+				break;
+			}
+		}
+		nextLink = res.data.next;
+	} while (nextLink && hasLSAlbum);
+
+	if (!hasLSAlbum) {
+		playlist.tracks = undefined;
+		return playlist;
+	}
+
+	for (const i in APItracks) {
+		const track = APItracks[i].track;
+		newData.tracks.push({
+			place: i,
+			id: track.id,
+			length: track.duration_ms,
+			album: track.album.name,
+		});
+
+		newData.playlistMilliseconds += track.duration_ms;
+		const trackAddedDate = Date.parse(APItracks[i].added_at);
+
+		// Updated lastUpdated if trackAddedDate is later
+		if (trackAddedDate > newData.lastUpdated) {
+			newData.lastUpdated = trackAddedDate;
+		}
+
+		if (newData.albumsString.indexOf(track.album.name) === -1) {
+			newData.albums.push({ id: track.album.id, name: track.album.name });
+			newData.albumsString += track.album.name + ", ";
+		}
+	}
+
+	if (!hasLSAlbum && Object.entries(newData.tracks).length > 0) {
+		newData.tracks = undefined;
+	}
+
+	// Remove comma/space from album list
+	newData.albumsString = newData.albumsString.substring(
+		0,
+		newData.albumsString.length - 2
+	);
+	playlist = {
+		...playlist,
+		...newData,
+	};
+
+	return playlist;
+}
 
 export async function addAlbums(side, replaceArg) {
 	resetProgress();
@@ -14,13 +143,21 @@ export async function addAlbums(side, replaceArg) {
 	let newAlbumsList = [];
 	let newTracksList = [];
 
+	// Tell the user what's up
 	if (replace) {
 		side = "end";
+		user.log(
+			`It's time to replace ${user.selectedPlaylists.length} playlists with ${user.selectedAlbums.length} selected albums.`,
+			"start"
+		);
+	} else {
+		user.log(
+			`It's time to add ${user.selectedAlbums.length} albums to the ${side} of ${user.selectedPlaylists.length} playlists`,
+			"start"
+		);
 	}
-	user.log(
-		`It's time to add ${user.selectedAlbums.length} albums to the ${side} of ${user.selectedPlaylists.length} playlists`,
-		"start"
-	);
+
+	// Get track information from each of the albums
 	for (var i = 0; i < user.selectedAlbums.length; i++) {
 		user.log(
 			`Grabbing track info for ${
@@ -28,7 +165,7 @@ export async function addAlbums(side, replaceArg) {
 			}`
 		);
 		let res = await axios.get(
-			`https://api.spotify.com/v1/albums/${user.selectedAlbums[i]}/tracks`,
+			`https://api.spotify.com/v1/albums/${user.selectedAlbums[i]}/tracks?limit=50`,
 			{
 				headers: {
 					Authorization: "Bearer " + user.token,
@@ -38,14 +175,18 @@ export async function addAlbums(side, replaceArg) {
 		albumDetails = albumDetails.concat(res.data);
 		newAlbumsString += `${user.allAlbums[user.selectedAlbums[i]].name}, `;
 		newAlbumsList.push(user.allAlbums[user.selectedAlbums[i]]);
-		// console.log(albumDetails);
-		for (var cha = 0; cha < albumDetails[i].total; cha++) {
-			trackURIs.push(albumDetails[i].items[cha].uri);
-			addedTime += albumDetails[i].items[cha].duration_ms;
+		console.log(albumDetails[0]);
+		for (
+			var trackCount = 0;
+			trackCount < albumDetails[i].total;
+			trackCount++
+		) {
+			trackURIs.push(albumDetails[i].items[trackCount].uri);
+			addedTime += albumDetails[i].items[trackCount].duration_ms;
 			newTracksList.push({
-				place: cha,
-				id: albumDetails[i].items[cha].id,
-				length: albumDetails[i].items[cha].duration_ms,
+				place: trackCount,
+				id: albumDetails[i].items[trackCount].id,
+				length: albumDetails[i].items[trackCount].duration_ms,
 				album: user.selectedAlbums[i].name,
 			});
 		}
@@ -55,7 +196,11 @@ export async function addAlbums(side, replaceArg) {
 
 	// Go through each playlist and add the albums to it
 	for (var j = 0; j < user.selectedPlaylists.length; j++) {
-		const playlist = user.selectedPlaylists[j];
+		const playlistId = user.selectedPlaylists[j];
+		const playlistIndex = user.allPlaylists.findIndex(
+			(p) => p.id === playlistId
+		);
+		const playlist = user.allPlaylists[playlistIndex];
 		console.log(playlist.tracks);
 		// Don't add album if it's already on the playlist
 		// console.log(playlist.albumList, user.album.name, playlist.albumList.indexOf(user.album.name));
@@ -96,10 +241,12 @@ export async function addAlbums(side, replaceArg) {
 						user.log(
 							`Removed all previous albums from ${playlist.name}.`
 						);
-						user.allPlaylists[playlist.id].albumList = "";
-						user.allPlaylists[playlist.id].albums = [];
-						user.allPlaylists[playlist.id].tracks = [];
-						user.allPlaylists[playlist.id].playlistMilliseconds = 0;
+						user.allPlaylists[playlistIndex].albumsString = "";
+						user.allPlaylists[playlistIndex].albums = [];
+						user.allPlaylists[playlistIndex].tracks = [];
+						user.allPlaylists[
+							playlistIndex
+						].playlistMilliseconds = 0;
 					}
 					user.log(
 						`Successfully plopped ${trackURIs.length} beats onto ${playlist.name}.`
@@ -107,48 +254,54 @@ export async function addAlbums(side, replaceArg) {
 					// Update list of albums
 
 					if (side === "start") {
-						user.allPlaylists[playlist.id].albumList =
+						user.allPlaylists[playlistIndex].albumsString =
 							newAlbumsString +
-							user.allPlaylists[playlist.id].albumList;
+							user.allPlaylists[playlistIndex].albumsString;
 
-						user.allPlaylists[playlist.id].albums = arrayConcat(
+						user.allPlaylists[playlistIndex].albums = arrayConcat(
 							newAlbumsList,
-							user.allPlaylists[playlist.id].albums
+							user.allPlaylists[playlistIndex].albums
 						);
-						user.allPlaylists[playlist.id].tracks = arrayConcat(
+						user.allPlaylists[playlistIndex].tracks = arrayConcat(
 							newTracksList,
-							user.allPlaylists[playlist.id].tracks
+							user.allPlaylists[playlistIndex].tracks
 						);
 					} else {
-						if (user.allPlaylists[playlist.id].albumList !== "") {
-							user.allPlaylists[playlist.id].albumList += ", ";
+						if (
+							user.allPlaylists[playlistIndex].albumsString !== ""
+						) {
+							user.allPlaylists[playlistIndex].albumsString +=
+								", ";
 						}
-						user.allPlaylists[playlist.id].albumList =
-							user.allPlaylists[playlist.id].albumList +
+						user.allPlaylists[playlistIndex].albumsString =
+							user.allPlaylists[playlistIndex].albumsString +
 							newAlbumsString.substring(
 								0,
 								newAlbumsString.length - 2
 							);
-						user.allPlaylists[playlist.id].albums = arrayConcat(
-							user.allPlaylists[playlist.id].albums,
+						user.allPlaylists[playlistIndex].albums = arrayConcat(
+							user.allPlaylists[playlistIndex].albums,
 							newAlbumsList
 						);
-						user.allPlaylists[playlist.id].tracks = arrayConcat(
-							user.allPlaylists[playlist.id].tracks,
+						user.allPlaylists[playlistIndex].tracks = arrayConcat(
+							user.allPlaylists[playlistIndex].tracks,
 							newTracksList
 						);
 					}
 					// Update total time
 					user.allPlaylists[
-						playlist.id
+						playlistIndex
 					].playlistMilliseconds += addedTime;
 					// Update lastUpdated
 					user.allPlaylists[
-						playlist.id
+						playlistIndex
 					].lastUpdated = Date.now().toString();
 				}
 			} catch (err) {
-				user.log(`Houston, we had an issue with ${playlist.name}...`);
+				user.log(
+					`Houston, we had an issue with ${playlist.name}.`,
+					"error"
+				);
 				console.log(err);
 			}
 		}
@@ -170,7 +323,11 @@ export async function replaceDescription(description) {
 	);
 	// Go through each playlist and replace the description
 	for (var j = 0; j < user.selectedPlaylists.length; j++) {
-		const playlist = user.selectedPlaylists[j];
+		const playlistId = user.selectedPlaylists[j];
+		const playlistIndex = user.allPlaylists.findIndex(
+			(p) => p.id === playlistId
+		);
+		const playlist = user.allPlaylists[playlistIndex];
 		let data = { description };
 
 		try {
@@ -186,10 +343,8 @@ export async function replaceDescription(description) {
 			);
 			// If successful, update local
 			if (res.status === 200) {
-				user.log(
-					`Bam. Description of ${user.selectedPlaylists[j].name} updated.`
-				);
-				user.allPlaylists[playlist.id].description = description;
+				user.log(`Bam. Description of ${playlist.name} updated.`);
+				user.allPlaylists[playlistIndex].description = description;
 			}
 		} catch (err) {
 			user.log(`Uh oh! There was an issue with .`);
@@ -206,17 +361,25 @@ export async function replaceDescription(description) {
 
 // Refresh: get list of playlist tracks and re-add them to playlist
 export async function refreshPlaylists() {
-	console.log("hey");
+	user.log(
+		`We're about to refresh ${user.selectedPlaylists.length} playlists.`,
+		"start"
+	);
 	for (var i = 0; i < user.selectedPlaylists.length; i++) {
-		const playlist = user.selectedPlaylists[i];
-		let data = { uris: [] };
+		const playlistId = user.selectedPlaylists[i];
+		const playlistIndex = user.allPlaylists.findIndex(
+			(p) => p.id === playlistId
+		);
+		const playlist = user.allPlaylists[playlistIndex];
+
+		let URIsToSend = [];
 		// Get list of playlist tracks
 		for (var j = 0; j < Object.keys(playlist.tracks).length; j++) {
-			console.log(playlist.tracks[j]);
-			data.uris.push(`spotify:track:${playlist.tracks[j].id}`);
+			URIsToSend.push(`spotify:track:${playlist.tracks[j].id}`);
 		}
 		try {
 			let res;
+			// Remove old tracks
 			const apiURL = `https://api.spotify.com/v1/playlists/${playlist.id}/tracks`;
 			res = await axios.put(
 				apiURL,
@@ -228,88 +391,48 @@ export async function refreshPlaylists() {
 					},
 				}
 			);
-			res = await axios.put(apiURL, data, {
-				headers: {
-					Authorization: "Bearer " + user.token,
-					"Content-Type": "application/json",
-				},
-			});
-
+			// Add tracks back in batches of 100
+			do {
+				console.log(URIsToSend);
+				let data = { uris: [] };
+				for (var k = 0; k < URIsToSend.length; k++) {
+					data.uris.push(URIsToSend[k]);
+					if (k === 99) {
+						break;
+					}
+				}
+				URIsToSend = URIsToSend.slice(
+					data.uris.length,
+					URIsToSend.length
+				);
+				console.log(URIsToSend);
+				console.log(data);
+				res = await axios.post(apiURL, data, {
+					headers: {
+						Authorization: "Bearer " + user.token,
+						"Content-Type": "application/json",
+					},
+				});
+				console.log(res);
+			} while (URIsToSend.length > 0);
 			// If successful, update local
 			console.log(res);
 			if (res.status === 201) {
-				user.log(`${playlist.name} is looking refreshed af.`);
+				user.log(`${playlist.name} is looking refreshed af.`, "end");
 			} else {
 				user.log(
-					`Refreshing ${playlist.name} gave us an error. Not cool man.`
+					`Refreshing ${playlist.name} gave us an error. Not cool man.`,
+					"error"
 				);
 			}
 		} catch (err) {
 			user.log(
-				`Refreshing ${playlist.name} gave us an error. Not cool man.`
+				`Refreshing ${playlist.name} gave us an error. Not cool man.`,
+				"error"
 			);
 			console.log(err);
 		}
 	}
-}
-
-export async function getPlaylistTracksAndAlbums(album_id) {
-	let nextLink;
-	let APItracks = [];
-	let tracks = [];
-	let albums = [];
-	let albumList = "";
-	let lastUpdated = Date.parse("1980-01-01T12:00:00Z");
-	let playlistMilliseconds = 0;
-	let hasLSAlbum = false;
-	do {
-		let res = await axios.get(
-			nextLink ||
-				`https://api.spotify.com/v1/playlists/${album_id}/tracks?fields=`,
-			{
-				headers: {
-					Authorization: "Bearer " + user.token,
-				},
-			}
-		);
-		// console.log(res);
-		APItracks = APItracks.concat(res.data.items);
-		nextLink = res.data.next;
-	} while (nextLink);
-
-	for (const i in APItracks) {
-		const track = APItracks[i].track;
-		tracks.push({
-			place: i,
-			id: track.id,
-			length: track.duration_ms,
-			album: track.album.name,
-		});
-		playlistMilliseconds += track.duration_ms;
-		const trackAddedDate = Date.parse(APItracks[i].added_at);
-
-		if (user.allAlbums.hasOwnProperty(track.album.id)) {
-			hasLSAlbum = true;
-		}
-		// Updated lastUpdated if trackAddedDate is later
-		if (trackAddedDate > lastUpdated) {
-			lastUpdated = trackAddedDate;
-		}
-
-		if (albumList.indexOf(track.album.name) === -1) {
-			albums.push({ id: track.album.id, name: track.album.name });
-			albumList += track.album.name + ", ";
-		}
-	}
-
-	if (!hasLSAlbum && Object.entries(tracks).length > 0) {
-		tracks = undefined;
-	}
-
-	// Remove comma/space from album list
-	albumList = albumList.substring(0, albumList.length - 2);
-
-	return [tracks, albums, albumList, lastUpdated, playlistMilliseconds];
 }
 
 function resetProgress() {
