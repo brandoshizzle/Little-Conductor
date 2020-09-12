@@ -1,5 +1,12 @@
 ## To Do
 
+NEW tweaks:
+1. Select/deselect all playlists
+2. Readme/troubleshooting
+3. In UI console, instead of "refresh page" perhaps have it say "do hard refresh (shift + f5)
+
+Old tweaks:
+
 1. Replace playlist albums (0.5 hours) **(DS: I'm assuming this means a refresh with the albums that are already on there? If so, yes)**
 2. Don't add any albums that exist on the playlist already (0.3 hours)
 3. Reorder albums by dragging (2 hours) **(DS: It would be nice if they were little blocks that could be moved around)**
