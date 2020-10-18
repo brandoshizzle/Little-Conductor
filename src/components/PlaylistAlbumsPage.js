@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
+import TextField from "@material-ui/core/TextField";
 
 import AlbumList from "./AlbumList";
 import PlaylistTable from "./PlaylistTable";
@@ -26,12 +27,17 @@ const PlaylistAlbumsPage = (props) => {
 	const { token } = props;
 	const classes = useStyles();
 	const sidebarWidth = 250;
+	const [search, setSearch] = useState("");
+
+	const handleSearchChange = (event) => {
+		setSearch(event.target.value);
+	};
+
 	return (
 		<div className={classes.root}>
 			<div
 				style={{
 					position: "fixed",
-					// height: "calc(100vh-60px)",
 					width: sidebarWidth,
 					top: 55,
 					left: 5,
@@ -47,10 +53,21 @@ const PlaylistAlbumsPage = (props) => {
 					position: "absolute",
 					marginRight: 10,
 					left: sidebarWidth + 10,
-					width: "66%",
 					top: 55,
 				}}>
-				<PlaylistTable token={token} />
+				<TextField
+					id="outlined-basic"
+					label="Search"
+					variant="outlined"
+					style={{
+						float: "right",
+						background: "rgba(250,250,250,0.7)",
+						marginBottom: 10,
+					}}
+					onChange={handleSearchChange}
+					value={search}
+				/>
+				<PlaylistTable token={token} search={search} />
 			</div>
 			<div
 				style={{

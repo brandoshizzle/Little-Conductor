@@ -28,6 +28,9 @@ const PlaylistTable = (props) => {
 	const classes = useStyles();
 
 	const [tableWidth, setTableWidth] = useState(500);
+	const [sortedAllPlaylists, setSortedAllPlaylists] = useState(
+		user.allPlaylists
+	);
 	const [rows, setRows] = useState(user.allPlaylists);
 
 	useEffect(() => {
@@ -40,6 +43,30 @@ const PlaylistTable = (props) => {
 		});
 		api.loadTable();
 	}, []);
+
+	useEffect(() => {
+		console.log(props.search.length);
+		if (props.search.length > 2) {
+			const newPlaylists = sortedAllPlaylists.filter((playlistInfo) => {
+				console.log(playlistInfo.name);
+				console.log(
+					playlistInfo.name.indexOf(props.search.toLowerCase())
+				);
+				return (
+					playlistInfo.name
+						.toLowerCase()
+						.indexOf(props.search.toLowerCase()) > -1 ||
+					playlistInfo.albumsString
+						.toLowerCase()
+						.indexOf(props.search.toLowerCase()) > -1
+				);
+			});
+			console.log(newPlaylists);
+			setRows(newPlaylists);
+		} else {
+			setRows(sortedAllPlaylists);
+		}
+	}, [props.search, sortedAllPlaylists]);
 
 	const playlistLengthFormatter = ({ value }) => {
 		// console.log(value);
@@ -138,7 +165,7 @@ const PlaylistTable = (props) => {
 					},
 				}}
 				onGridSort={(sortColumn, sortDirection) => {
-					setRows(
+					setSortedAllPlaylists(
 						sortRows(user.allPlaylists, sortColumn, sortDirection)
 					);
 				}}

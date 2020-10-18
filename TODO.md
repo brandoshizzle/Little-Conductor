@@ -1,12 +1,9 @@
 ## To Do
 
-1. Replace playlist albums (0.5 hours) **(DS: I'm assuming this means a refresh with the albums that are already on there? If so, yes)**
 2. Don't add any albums that exist on the playlist already (0.3 hours)
 3. Reorder albums by dragging (2 hours) **(DS: It would be nice if they were little blocks that could be moved around)**
-4. Input list of playlist urls from sheets and give back list of followers to paste back (2 hours)
-5. Having the ability to paste in a column of playlist links and follow all of the ones I am currently not already following (1.5 hour)
-6. Add n first, push last n (1.5 hours)
-7. Add tags to playlists (4 hours)
+4. Add n first, push last n (1.5 hours)
+5. Add tags to playlists (4 hours)
 
 ## UI
 
@@ -31,3 +28,6 @@
 -   Playlist length (in time)
 -   Bold header row (i.e. "Name", "Description" etc.)
 -   Bold Playlist name
+-   Replace playlist albums
+-   Input list of playlist urls from sheets and give back list of followers to paste back
+-   Having the ability to paste in a column of playlist links and follow all of the ones I am currently not already following (1.5 hour)
