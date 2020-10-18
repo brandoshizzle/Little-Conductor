@@ -264,30 +264,6 @@ export async function addAlbums(side, replaceArg) {
 					console.log(res);
 				} while (trackURIs.length > 0);
 
-				// do {
-				// 	console.log(URIsToSend);
-				// 	let data = { uris: [] };
-				// 	for (var k = 0; k < URIsToSend.length; k++) {
-				// 		data.uris.push(URIsToSend[k]);
-				// 		if (k === 99) {
-				// 			break;
-				// 		}
-				// 	}
-				// 	URIsToSend = URIsToSend.slice(
-				// 		data.uris.length,
-				// 		URIsToSend.length
-				// 	);
-				// 	console.log(URIsToSend);
-				// 	console.log(data);
-				// 	res = await axios.post(apiURL, data, {
-				// 		headers: {
-				// 			Authorization: "Bearer " + user.token,
-				// 			"Content-Type": "application/json",
-				// 		},
-				// 	});
-				// 	console.log(res);
-				// } while (URIsToSend.length > 0);
-
 				// If successful, update local
 				console.log(res);
 				if (res.status === 201) {
@@ -467,10 +443,8 @@ export async function refreshPlaylists() {
 						"Content-Type": "application/json",
 					},
 				});
-				console.log(res);
 			} while (URIsToSend.length > 0);
 			// If successful, update local
-			console.log(res);
 			if (res.status === 201) {
 				user.log(`${playlist.name} is looking refreshed af.`, "end");
 			} else {
@@ -487,6 +461,107 @@ export async function refreshPlaylists() {
 			console.log(err);
 		}
 	}
+}
+
+export async function followPlaylists(listString) {
+	const listArray = listString.split("\n");
+	// Example format of one array element
+	// https://open.spotify.com/playlist/7qJbIatA439sogHeQ0lOnS?si=qem5KAPzQ-2tD8RIVOf99A
+	const idArray = listArray.map((url) => {
+		const playlistIndex = url.indexOf("playlist");
+		const questionmarkIndex = url.indexOf("?");
+		return url.substring(playlistIndex + 9, questionmarkIndex);
+	});
+
+	user.log(`We're about to follow ${idArray.length} playlists.`, "start");
+	for (var i = 0; i < idArray.length; i++) {
+		const playlistId = idArray[i];
+		console.log(playlistId);
+		try {
+			let res;
+			// Remove old tracks
+			const apiURL = `https://api.spotify.com/v1/playlists/${playlistId}/followers`;
+			res = await axios.put(
+				apiURL,
+				{},
+				{
+					headers: {
+						Authorization: "Bearer " + user.token,
+						"Content-Type": "application/json",
+					},
+				}
+			);
+
+			// If successful, update local
+			if (res.status === 200) {
+				user.log(`${idArray[i]} has been followed.`);
+			} else {
+				user.log(
+					`Following ${listArray[i]} gave us an error. Not cool man.`,
+					"error"
+				);
+			}
+		} catch (err) {
+			user.log(
+				`Following ${listArray[i]} gave us an error. Not cool man.`,
+				"error"
+			);
+			console.log(err);
+		}
+	}
+	user.log(`All done boss.`, "end");
+}
+
+export async function getFollowerCounts(listString) {
+	let resultsArray = [];
+	const listArray = listString.split("\n");
+	// Example format of one array element
+	// https://open.spotify.com/playlist/7qJbIatA439sogHeQ0lOnS?si=qem5KAPzQ-2tD8RIVOf99A
+	const idArray = listArray.map((url) => {
+		const playlistIndex = url.indexOf("playlist");
+		const questionmarkIndex = url.indexOf("?");
+		return url.substring(playlistIndex + 9, questionmarkIndex);
+	});
+
+	user.log(
+		`We're about to get follower counts from ${idArray.length} playlists.`,
+		"start"
+	);
+	for (var i = 0; i < idArray.length; i++) {
+		const playlistId = idArray[i];
+		console.log(playlistId);
+		try {
+			let res;
+			// Remove old tracks
+			const apiURL = `https://api.spotify.com/v1/playlists/${playlistId}`;
+			res = await axios.get(apiURL, {
+				headers: {
+					Authorization: "Bearer " + user.token,
+					"Content-Type": "application/json",
+				},
+			});
+
+			// If successful, update local
+			console.log(res);
+			if (res.status === 200) {
+				user.log(`Got followers from ${idArray[i]}.`);
+				resultsArray.push(res.data.followers.total);
+			} else {
+				user.log(
+					`Getting followers from ${listArray[i]} gave us an error. Not cool man.`,
+					"error"
+				);
+			}
+		} catch (err) {
+			user.log(
+				`Getting followers from ${listArray[i]} gave us an error. Not cool man.`,
+				"error"
+			);
+			console.log(err);
+		}
+	}
+	user.log(`All done boss.`, "end");
+	return resultsArray.join("\n");
 }
 
 function resetProgress() {
