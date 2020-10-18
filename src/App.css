@@ -23,15 +23,16 @@
 }
 
 .react-grid-Canvas {
-	background-color: rgba(0, 0, 0, 0);
+	background-color: rgba(0, 0, 0, 0) !important;
 }
 
 .react-grid-Grid {
-	background-color: rgba(240, 240, 240, 0.7);
+	background-color: rgba(240, 240, 240, 0.7) !important;
 }
 
 .react-grid-Main {
-	background-color: rgba(0, 0, 0, 0);
+	background-color: rgba(0, 0, 0, 0) !important;
+	color: #333 !important;
 }
 
 .no-overflow {
@@ -76,10 +77,6 @@
 html,
 body {
 	height: 100%;
-}
-
-.react-grid-Main {
-	color: #333;
 }
 
 body {

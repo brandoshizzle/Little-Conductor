@@ -5,6 +5,8 @@ import * as api from "./../api";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 
+import HelpDialog from "./HelpDialog";
+
 import { view } from "@risingstack/react-easy-state";
 import { user } from "./../store";
 
@@ -35,10 +37,16 @@ const useStyles = makeStyles((theme) => ({
 const ActionButtons = (props) => {
 	const classes = useStyles();
 	const [desc, setDesc] = useState("");
+	const [helpOpen, setHelpOpen] = useState(false);
 
 	function descChange(e) {
 		setDesc(e.target.value);
 	}
+
+	const handleDialogClose = () => {
+		setHelpOpen(false);
+		console.log(helpOpen);
+	};
 
 	return (
 		<div>
@@ -147,7 +155,7 @@ const ActionButtons = (props) => {
 						);
 					}}
 					size="small">
-					Clear Token
+					Re-spotify
 				</Button>
 				<Button
 					variant="contained"
@@ -157,13 +165,24 @@ const ActionButtons = (props) => {
 						localStorage.clear();
 						user.allPlaylists = [];
 						user.log(
-							"All playlist data has been cleared. Please refresh your webpage.",
+							"All playlist data has been cleared. Please hard refresh (Shift + F5) your webpage.",
 							"end"
 						);
 					}}
 					size="small">
-					RESET
+					RESET PROGRAM
 				</Button>
+				<Button
+					variant="contained"
+					color="primary"
+					className={classes.item}
+					onClick={() => {
+						setHelpOpen(true);
+					}}
+					size="small">
+					It's not working!
+				</Button>
+				<HelpDialog open={helpOpen} onClose={handleDialogClose} />
 			</div>
 		</div>
 	);

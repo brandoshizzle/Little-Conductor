@@ -193,6 +193,7 @@ export async function addAlbums(side, replaceArg) {
 	}
 	console.log(newAlbumsList);
 	console.log(newTracksList);
+	const numTracks = trackURIs.length;
 
 	// Go through each playlist and add the albums to it
 	for (var j = 0; j < user.selectedPlaylists.length; j++) {
@@ -206,33 +207,86 @@ export async function addAlbums(side, replaceArg) {
 		// console.log(playlist.albumList, user.album.name, playlist.albumList.indexOf(user.album.name));
 		// if (playlist.albumList.indexOf(user.album.name) === -1) {
 		if (true) {
-			let data =
-				side === "start"
-					? {
-							uris: trackURIs,
-							position: 0,
-					  }
-					: {
-							uris: trackURIs,
-					  };
 			try {
 				let res;
-				const apiURL = `https://api.spotify.com/v1/playlists/${playlist.id}/tracks`;
-				if (replace) {
-					res = await axios.put(apiURL, data, {
-						headers: {
-							Authorization: "Bearer " + user.token,
-							"Content-Type": "application/json",
-						},
-					});
-				} else {
-					res = await axios.post(apiURL, data, {
-						headers: {
-							Authorization: "Bearer " + user.token,
-							"Content-Type": "application/json",
-						},
-					});
-				}
+				do {
+					let data =
+						side === "start"
+							? {
+									uris: [],
+									position: 0,
+							  }
+							: {
+									uris: [],
+							  };
+					for (var k = 0; k < trackURIs.length; k++) {
+						let trackURI;
+						if (side === "start") {
+							trackURI = trackURIs[trackURIs.length - 1 - k];
+							data.uris.unshift(trackURI);
+						} else {
+							trackURI = trackURIs[k];
+							data.uris.push(trackURI);
+						}
+
+						if (k === 99) {
+							break;
+						}
+					}
+					if (side === "start") {
+						trackURIs = trackURIs.slice(0, -data.uris.length);
+					} else {
+						trackURIs = trackURIs.slice(
+							data.uris.length,
+							trackURIs.length
+						);
+					}
+
+					const apiURL = `https://api.spotify.com/v1/playlists/${playlist.id}/tracks`;
+					if (
+						replace &&
+						trackURIs.length + data.uris.length === numTracks
+					) {
+						res = await axios.put(apiURL, data, {
+							headers: {
+								Authorization: "Bearer " + user.token,
+								"Content-Type": "application/json",
+							},
+						});
+					} else {
+						res = await axios.post(apiURL, data, {
+							headers: {
+								Authorization: "Bearer " + user.token,
+								"Content-Type": "application/json",
+							},
+						});
+					}
+					console.log(res);
+				} while (trackURIs.length > 0);
+
+				// do {
+				// 	console.log(URIsToSend);
+				// 	let data = { uris: [] };
+				// 	for (var k = 0; k < URIsToSend.length; k++) {
+				// 		data.uris.push(URIsToSend[k]);
+				// 		if (k === 99) {
+				// 			break;
+				// 		}
+				// 	}
+				// 	URIsToSend = URIsToSend.slice(
+				// 		data.uris.length,
+				// 		URIsToSend.length
+				// 	);
+				// 	console.log(URIsToSend);
+				// 	console.log(data);
+				// 	res = await axios.post(apiURL, data, {
+				// 		headers: {
+				// 			Authorization: "Bearer " + user.token,
+				// 			"Content-Type": "application/json",
+				// 		},
+				// 	});
+				// 	console.log(res);
+				// } while (URIsToSend.length > 0);
 
 				// If successful, update local
 				console.log(res);
@@ -249,7 +303,7 @@ export async function addAlbums(side, replaceArg) {
 						].playlistMilliseconds = 0;
 					}
 					user.log(
-						`Successfully plopped ${trackURIs.length} beats onto ${playlist.name}.`
+						`Successfully plopped ${numTracks} beats onto ${playlist.name}.`
 					);
 					// Update list of albums
 
