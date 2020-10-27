@@ -519,7 +519,10 @@ export async function getFollowerCounts(listString) {
 	// https://open.spotify.com/playlist/7qJbIatA439sogHeQ0lOnS?si=qem5KAPzQ-2tD8RIVOf99A
 	const idArray = listArray.map((url) => {
 		const playlistIndex = url.indexOf("playlist");
-		const questionmarkIndex = url.indexOf("?");
+		let questionmarkIndex = url.indexOf("?");
+		if (questionmarkIndex === -1) {
+			questionmarkIndex = url.length;
+		}
 		return url.substring(playlistIndex + 9, questionmarkIndex);
 	});
 
