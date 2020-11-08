@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import useAxios from 'axios-hooks';
+import React, { useState, useEffect } from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import AppBar from "@material-ui/core/AppBar";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
+import Box from "@material-ui/core/Box";
+import Button from "@material-ui/core/Button";
+import useAxios from "axios-hooks";
+import Typography from "@material-ui/core/Typography";
 
-import { view } from '@risingstack/react-easy-state';
-import { user } from './../store';
+import { view } from "@risingstack/react-easy-state";
+import { user } from "./../store";
 
-import PlaylistAlbumsPage from './PlaylistAlbumsPage';
-import UtilitiesPage from './UtilitiesPage';
+import PlaylistAlbumsPage from "./PlaylistAlbumsPage";
+import UtilitiesPage from "./UtilitiesPage";
 
 function TabPanel(props) {
 	const { children, value, index, ...other } = props;
@@ -22,8 +23,7 @@ function TabPanel(props) {
 			hidden={value !== index}
 			id={`simple-tabpanel-${index}`}
 			aria-labelledby={`simple-tab-${index}`}
-			{...other}
-		>
+			{...other}>
 			{value === index && <Box p={3}>{children}</Box>}
 		</div>
 	);
@@ -32,14 +32,14 @@ function TabPanel(props) {
 function a11yProps(index) {
 	return {
 		id: `simple-tab-${index}`,
-		'aria-controls': `simple-tabpanel-${index}`,
+		"aria-controls": `simple-tabpanel-${index}`,
 	};
 }
 
 const useStyles = makeStyles((theme) => ({
 	root: {
 		flexGrow: 1,
-		height: 'calc(100vh - 48px)',
+		height: "calc(100vh - 48px)",
 		// backgroundColor: theme.palette.background.paper,
 	},
 }));
@@ -48,17 +48,17 @@ const Main = (props) => {
 	const classes = useStyles();
 	const { token } = props;
 	const [value, setValue] = useState(0);
-
+	const [tokenTimeout, setTokenTimout] = useState(user.tokenms - Date.now());
 	const [{ data, loading, error }] = useAxios({
-		url: 'https://api.spotify.com/v1/me',
-		method: 'GET',
+		url: "https://api.spotify.com/v1/me",
+		method: "GET",
 		headers: {
-			Authorization: 'Bearer ' + token,
+			Authorization: "Bearer " + token,
 		},
 	});
 
 	if (loading) {
-		console.log('Loading user...');
+		console.log("Loading user...");
 	}
 
 	if (data) {
@@ -67,22 +67,41 @@ const Main = (props) => {
 		user.id = data.id;
 	}
 
+	useEffect(() => {
+		const tokenTimeoutInterval = setInterval(() => {
+			setTokenTimout(user.tokenms - Date.now());
+			if (tokenTimeout < 1000) {
+				tokenTimeoutInterval.clear();
+			}
+		}, 60000);
+	}, []);
+
 	const handleChange = (event, newValue) => {
 		setValue(newValue);
 	};
 
-	if (user.id !== '') {
+	if (user.id !== "") {
 		return (
 			<div className={classes.root}>
 				{/* <div style={{ display: 'flex' }}> */}
-				<AppBar position="static" style={{ width: '100%' }}>
-					<Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
+				<AppBar position="static" style={{ width: "100%" }}>
+					<Tabs
+						value={value}
+						onChange={handleChange}
+						aria-label="simple tabs example"
+						style={{ width: "75%" }}>
 						<Tab label="Playlist Tools" {...a11yProps(0)} />
 						<Tab label="Utilities" {...a11yProps(1)} />
 					</Tabs>
+					<div style={{ position: "absolute", top: 10, right: 10 }}>
+						<Typography variant="h5">
+							Spotify access expires in:{" "}
+							{Math.ceil(tokenTimeout / 1000 / 60)} mins
+						</Typography>
+					</div>
 				</AppBar>
 				{/* </div> */}
-				<TabPanel value={value} index={0} style={{ height: '100%' }}>
+				<TabPanel value={value} index={0} style={{ height: "100%" }}>
 					<PlaylistAlbumsPage token={token} />
 				</TabPanel>
 				<TabPanel value={value} index={1}>
@@ -95,14 +114,16 @@ const Main = (props) => {
 	if (error) {
 		return (
 			<div>
-				<p>If you're seeing this, click this button, then refresh the page.</p>
+				<p>
+					If you're seeing this, click this button, then refresh the
+					page.
+				</p>
 				<Button
 					variant="contained"
 					color="primary"
 					onClick={() => {
-						localStorage.setItem('token', '');
-					}}
-				>
+						localStorage.setItem("token", "");
+					}}>
 					Clear Token
 				</Button>
 			</div>

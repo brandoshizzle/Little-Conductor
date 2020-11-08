@@ -155,22 +155,7 @@ const ActionButtons = (props) => {
 						);
 					}}
 					size="small">
-					Re-spotify
-				</Button>
-				<Button
-					variant="contained"
-					color="primary"
-					className={classes.item}
-					onClick={() => {
-						localStorage.clear();
-						user.allPlaylists = [];
-						user.log(
-							"All playlist data has been cleared. Please hard refresh (Shift + F5) your webpage.",
-							"end"
-						);
-					}}
-					size="small">
-					RESET PROGRAM
+					Spotify access token
 				</Button>
 				<Button
 					variant="contained"
@@ -180,7 +165,7 @@ const ActionButtons = (props) => {
 						setHelpOpen(true);
 					}}
 					size="small">
-					It's not working!
+					I'm getting an error!
 				</Button>
 				<HelpDialog open={helpOpen} onClose={handleDialogClose} />
 			</div>

@@ -6,6 +6,7 @@ const defaultUser = {
 	name: "",
 	id: "",
 	token: "",
+	tokenms: 0,
 	allPlaylists: [],
 	filteredPlaylists: [],
 	selectedAlbums: [],

@@ -1,12 +1,21 @@
 import React from "react";
+import { makeStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Typography from "@material-ui/core/Typography";
+import { user } from "./../store";
+const useStyles = makeStyles((theme) => ({
+	item: {
+		margin: 0,
+		marginRight: 2,
+		marginBottom: 2,
+	},
+}));
 
 const AlertDialog = (props) => {
+	const classes = useStyles();
 	return (
 		<div>
 			<Dialog
@@ -15,18 +24,61 @@ const AlertDialog = (props) => {
 				aria-labelledby="alert-dialog-title"
 				aria-describedby="alert-dialog-description">
 				<DialogTitle id="alert-dialog-title">
-					{"So it's not working eh?"}
+					Please do the following in order:
 				</DialogTitle>
 				<DialogContent>
-					<DialogContentText id="alert-dialog-description">
-						I try my best, but there's always going to be issues.
-						I'll try to squash them when I can. If you run into an
-						issue (especially if I just published an update!), first
-						click the "Reset Program" button, then hard-reset your
-						page by hitting Shift + F5. This will clear out old bad
-						stuff and get you super up to date. If it STILL doesn't
-						work, contact Brandon (cathcart.brandon@gmail.com).
-					</DialogContentText>
+					<div>
+						<Typography variant="body1">
+							Spotify probably needs to re-authenticate.
+						</Typography>
+
+						<Button
+							variant="contained"
+							color="primary"
+							className={classes.item}
+							onClick={() => {
+								localStorage.setItem("token", "");
+								user.log(
+									"Spotify token has been cleared. Please hit Ctrl+F5 to hard refresh your webpage.",
+									"end"
+								);
+							}}
+							size="small">
+							Click here
+						</Button>
+						<br />
+						<Typography variant="body1">
+							If the above button not work, let's reset all your
+							data.
+						</Typography>
+						<Button
+							variant="contained"
+							color="primary"
+							className={classes.item}
+							onClick={() => {
+								localStorage.clear();
+								user.allPlaylists = [];
+								user.log(
+									"All playlist data has been cleared. Please hit Ctrl+F5 to hard refresh your webpage.",
+									"end"
+								);
+							}}
+							size="small">
+							Click here
+						</Button>
+						<br />
+						<Typography variant="body1">
+							If those didn't work, contact Brandon.
+						</Typography>
+						<Button
+							variant="contained"
+							color="primary"
+							className={classes.item}
+							href={"mailto:cathcart.brandon@gmail.com"}
+							size="small">
+							Click here
+						</Button>
+					</div>
 				</DialogContent>
 			</Dialog>
 		</div>

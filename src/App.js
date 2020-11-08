@@ -40,6 +40,11 @@ class App extends Component {
 		// Set token
 		let _token = hash.access_token || localStorage.getItem("token");
 
+		if (hash.access_token) {
+			// Set to 30 minutes later than now
+			user.tokenms = Date.now() + 30 * 60 * 1000;
+		}
+
 		if (_token) {
 			// Set token
 			this.setState({
@@ -47,7 +52,6 @@ class App extends Component {
 			});
 			localStorage.setItem("token", _token);
 			user.token = _token;
-			// this.getCurrentlyPlaying(_token);
 		}
 	}
 
