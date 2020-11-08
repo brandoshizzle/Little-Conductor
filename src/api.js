@@ -1,5 +1,6 @@
 import { user, addPlaylist } from "./store";
 import axios from "axios";
+import cloneDeep from "lodash/cloneDeep";
 
 const APIdelay = 300;
 
@@ -42,7 +43,9 @@ export async function loadTable() {
 						addPlaylist(playlist);
 					} else {
 						user.log(`${playlist.name} was not relaxing enough.`);
-						user.filteredPlaylists.push(playlist.id);
+						const newFiltered = user.filteredPlaylists.splice();
+						newFiltered.push(playlist.id);
+						user.filteredPlaylists = newFiltered;
 					}
 				}
 			}
@@ -282,50 +285,46 @@ export async function addAlbums(side, replaceArg) {
 						`Successfully plopped ${numTracks} beats onto ${playlist.name}.`
 					);
 					// Update list of albums
-
+					let newPlaylistData = cloneDeep(
+						user.allPlaylists[playlistIndex]
+					);
 					if (side === "start") {
-						user.allPlaylists[playlistIndex].albumsString =
-							newAlbumsString +
-							user.allPlaylists[playlistIndex].albumsString;
+						newPlaylistData.albumsString =
+							newAlbumsString + newPlaylistData.albumsString;
 
-						user.allPlaylists[playlistIndex].albums = arrayConcat(
+						newPlaylistData.albums = arrayConcat(
 							newAlbumsList,
-							user.allPlaylists[playlistIndex].albums
+							newPlaylistData.albums
 						);
-						user.allPlaylists[playlistIndex].tracks = arrayConcat(
+						newPlaylistData.tracks = arrayConcat(
 							newTracksList,
-							user.allPlaylists[playlistIndex].tracks
+							newPlaylistData.tracks
 						);
 					} else {
-						if (
-							user.allPlaylists[playlistIndex].albumsString !== ""
-						) {
-							user.allPlaylists[playlistIndex].albumsString +=
-								", ";
+						if (newPlaylistData.albumsString !== "") {
+							newPlaylistData.albumsString += ", ";
 						}
-						user.allPlaylists[playlistIndex].albumsString =
-							user.allPlaylists[playlistIndex].albumsString +
+						newPlaylistData.albumsString =
+							newPlaylistData.albumsString +
 							newAlbumsString.substring(
 								0,
 								newAlbumsString.length - 2
 							);
-						user.allPlaylists[playlistIndex].albums = arrayConcat(
-							user.allPlaylists[playlistIndex].albums,
+						newPlaylistData.albums = arrayConcat(
+							newPlaylistData.albums,
 							newAlbumsList
 						);
-						user.allPlaylists[playlistIndex].tracks = arrayConcat(
-							user.allPlaylists[playlistIndex].tracks,
+						newPlaylistData.tracks = arrayConcat(
+							newPlaylistData.tracks,
 							newTracksList
 						);
 					}
 					// Update total time
-					user.allPlaylists[
-						playlistIndex
-					].playlistMilliseconds += addedTime;
+					newPlaylistData.playlistMilliseconds += addedTime;
 					// Update lastUpdated
-					user.allPlaylists[
-						playlistIndex
-					].lastUpdated = Date.now().toString();
+					newPlaylistData.lastUpdated = Date.now().toString();
+					// Write back to state
+					user.allPlaylists[playlistIndex] = newPlaylistData;
 				}
 			} catch (err) {
 				user.log(
@@ -374,7 +373,8 @@ export async function replaceDescription(description) {
 			// If successful, update local
 			if (res.status === 200) {
 				user.log(`Bam. Description of ${playlist.name} updated.`);
-				user.allPlaylists[playlistIndex].description = description;
+				playlist.description = description;
+				user.allPlaylists[playlistIndex] = playlist;
 			}
 		} catch (err) {
 			user.log(`Uh oh! There was an issue with .`);

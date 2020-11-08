@@ -131,17 +131,19 @@ const PlaylistTable = (props) => {
 	];
 
 	function onRowsSelected(rows) {
-		console.log(rows);
-		user.selectedPlaylists.push(rows[0].row.id);
-		// setSelectedIds(selectedIds.concat(rows.map((r) => r.row.id)));
+		for (var i = 0; i < rows.length; i++) {
+			let newSelected = user.selectedPlaylists.slice();
+			newSelected.push(rows[i].row.id);
+			user.selectedPlaylists = newSelected;
+		}
 	}
 
 	function onRowsDeselected(rows) {
-		user.selectedPlaylists = user.selectedPlaylists.filter(
-			(e) => e !== rows[0].row.id
-		);
-		// let rowIds = rows.map((r) => r.row.id);
-		// setSelectedIds(selectedIds.filter((i) => rowIds.indexOf(i) === -1));
+		for (var i = 0; i < rows.length; i++) {
+			user.selectedPlaylists = user.selectedPlaylists.filter(
+				(e) => e !== rows[i].row.id
+			);
+		}
 	}
 
 	return (
