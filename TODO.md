@@ -1,9 +1,6 @@
 ## To Do
-
-2. Don't add any albums that exist on the playlist already (0.3 hours)
-3. Reorder albums by dragging (2 hours) **(DS: It would be nice if they were little blocks that could be moved around)**
-4. Add n first, push last n (1.5 hours)
-5. Add tags to playlists (4 hours)
+- Add n first, push last n (1.5 hours)
+- Add tags to playlists (4 hours)
 
 ## UI
 
