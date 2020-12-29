@@ -1,12 +1,13 @@
-import { store } from '@risingstack/react-easy-state';
-import { observe } from '@nx-js/observer-util';
-import merge from 'lodash/merge';
+import { store } from "@risingstack/react-easy-state";
+import { observe } from "@nx-js/observer-util";
+import merge from "lodash/merge";
 
 const defaultUser = {
-	name: '',
-	id: '',
-	token: '',
-	allPlaylists: {},
+	name: "",
+	id: "",
+	token: "",
+	tokenms: 0,
+	allPlaylists: [],
 	filteredPlaylists: [],
 	selectedAlbums: [],
 	allAlbums: {},
@@ -17,49 +18,45 @@ const defaultUser = {
 		percent: 0,
 	},
 	log: (newLine, color) => {
-		const textColor = color || 'normal';
+		const textColor = color || "normal";
 		const colors = {
-			start: 'green',
-			normal: '#ddd',
-			end: 'red',
+			start: "cornflowerblue",
+			normal: "#ddd",
+			end: "lightgreen",
+			error: "red",
 		};
-		user.logArray.unshift({ text: newLine, color: colors[textColor] });
+		const logline = "> " + newLine;
+		user.logArray.push({ text: logline, color: colors[textColor] });
+		var logEl = document.getElementById("logger");
+		logEl.scrollTop = logEl.scrollHeight + 50;
 	},
 	logArray: [],
 	errors: [],
 };
 
+export function addPlaylist(playlistData) {
+	user.allPlaylists.push({
+		id: playlistData.id,
+		name: playlistData.name,
+		url: playlistData.external_urls.spotify,
+		tracks_endpoint: playlistData.tracks.href,
+		description: decodeURIComponent(playlistData.description),
+		tracks: playlistData.tracks,
+		albumsString: playlistData.albumsString,
+		albums: playlistData.albums,
+		lastUpdated: playlistData.lastUpdated,
+		playlistMilliseconds: playlistData.playlistMilliseconds,
+	});
+}
+
 export const user = store(
-	localStorage.getItem('user') != null ? merge(defaultUser, JSON.parse(localStorage.getItem('user'))) : defaultUser
+	localStorage.getItem("user") != null
+		? merge(defaultUser, JSON.parse(localStorage.getItem("user")))
+		: defaultUser
 );
 
 observe(() => {
-	localStorage.setItem('user', JSON.stringify(user));
+	localStorage.setItem("user", JSON.stringify(user));
 });
-
-// observe(() => {
-// 	playlistArray = [];
-// 	for (var playlist in user.allPlaylists) {
-// 		const newObj = {
-// 			...user.allPlaylists[playlist],
-// 		};
-// 		playlistArray.push(newObj);
-// 	}
-// 	// playlistArray = Object.values(user.allPlaylists);
-// 	console.log(playlistArray);
-// });
-
-export function playlistArray() {
-	let test = [];
-	for (var playlist in user.allPlaylists) {
-		const newObj = {
-			...user.allPlaylists[playlist],
-		};
-		test.push(newObj);
-	}
-	// playlistArray = Object.values(user.allPlaylists);
-	// console.log(test);
-	return test;
-}
 
 window.user = user;

@@ -3,8 +3,9 @@ import { makeStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import * as api from "./../api";
 import LinearProgress from "@material-ui/core/LinearProgress";
-import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
+
+import HelpDialog from "./HelpDialog";
 
 import { view } from "@risingstack/react-easy-state";
 import { user } from "./../store";
@@ -36,10 +37,16 @@ const useStyles = makeStyles((theme) => ({
 const ActionButtons = (props) => {
 	const classes = useStyles();
 	const [desc, setDesc] = useState("");
+	const [helpOpen, setHelpOpen] = useState(false);
 
 	function descChange(e) {
 		setDesc(e.target.value);
 	}
+
+	const handleDialogClose = () => {
+		setHelpOpen(false);
+		console.log(helpOpen);
+	};
 
 	return (
 		<div>
@@ -142,20 +149,25 @@ const ActionButtons = (props) => {
 					className={classes.item}
 					onClick={() => {
 						localStorage.setItem("token", "");
+						user.log(
+							"Spotify token has been cleared. Please refresh your webpage.",
+							"end"
+						);
 					}}
 					size="small">
-					Clear Token
+					Spotify access token
 				</Button>
 				<Button
 					variant="contained"
 					color="primary"
 					className={classes.item}
 					onClick={() => {
-						localStorage.removeItem("user");
+						setHelpOpen(true);
 					}}
 					size="small">
-					RESET
+					I'm getting an error!
 				</Button>
+				<HelpDialog open={helpOpen} onClose={handleDialogClose} />
 			</div>
 		</div>
 	);
