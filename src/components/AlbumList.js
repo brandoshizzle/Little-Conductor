@@ -58,7 +58,6 @@ const AlbumList = (props) => {
 				nextLink = res.data.next;
 			} while (nextLink);
 			user.log(`Loaded ${Object.values(user.allAlbums).length} albums`);
-			console.log(user.allAlbums);
 		}
 		// Get all LS albums
 		loadAlbums();

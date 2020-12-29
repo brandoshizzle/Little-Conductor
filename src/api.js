@@ -7,10 +7,12 @@ const APIdelay = 300;
 export async function loadTable() {
 	let nextLink;
 	user.log(`Fetching all of ${user.name}'s playlists`);
+	let res;
 	// Loop until we get all playlists
 	do {
 		// Get playlists from spotify
-		let res = await axios.get(
+
+		res = await axios.get(
 			nextLink || `https://api.spotify.com/v1/me/playlists?limit=50`,
 			{
 				headers: {
@@ -18,6 +20,9 @@ export async function loadTable() {
 				},
 			}
 		);
+		if (res.status !== 201) {
+			console.log(res);
+		}
 		// console.log(res);
 		let playlistBatch = res.data.items;
 		user.log(`Retrieved ${res.data.items.length} playlists`);
@@ -178,7 +183,7 @@ export async function addAlbums(side, replaceArg) {
 		albumDetails = albumDetails.concat(res.data);
 		newAlbumsString += `${user.allAlbums[user.selectedAlbums[i]].name}, `;
 		newAlbumsList.push(user.allAlbums[user.selectedAlbums[i]]);
-		console.log(albumDetails[0]);
+		// console.log(albumDetails[0]);
 		for (
 			var trackCount = 0;
 			trackCount < albumDetails[i].total;
@@ -194,8 +199,8 @@ export async function addAlbums(side, replaceArg) {
 			});
 		}
 	}
-	console.log(newAlbumsList);
-	console.log(newTracksList);
+	// console.log(newAlbumsList);
+	// console.log(newTracksList);
 	const numTracks = trackURIs.length;
 
 	// Go through each playlist and add the albums to it
@@ -268,7 +273,7 @@ export async function addAlbums(side, replaceArg) {
 				} while (trackURIs.length > 0);
 
 				// If successful, update local
-				console.log(res);
+				// console.log(res);
 				if (res.status === 201) {
 					if (replace) {
 						user.log(

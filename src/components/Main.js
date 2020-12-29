@@ -49,6 +49,20 @@ const Main = (props) => {
 	const { token } = props;
 	const [value, setValue] = useState(0);
 	const [tokenTimeout, setTokenTimout] = useState(user.tokenms - Date.now());
+
+	useEffect(() => {
+		const tokenTimeoutInterval = setInterval(() => {
+			setTokenTimout(user.tokenms - Date.now());
+			if (tokenTimeout < 1000) {
+				try {
+					tokenTimeoutInterval.clear();
+				} catch (e) {
+					console.log("Tried to clear interval, could not. Oh well.");
+				}
+			}
+		}, 60000);
+	}, []);
+
 	const [{ data, loading, error }] = useAxios({
 		url: "https://api.spotify.com/v1/me",
 		method: "GET",
@@ -66,15 +80,6 @@ const Main = (props) => {
 		user.name = data.display_name;
 		user.id = data.id;
 	}
-
-	useEffect(() => {
-		const tokenTimeoutInterval = setInterval(() => {
-			setTokenTimout(user.tokenms - Date.now());
-			if (tokenTimeout < 1000) {
-				tokenTimeoutInterval.clear();
-			}
-		}, 60000);
-	}, []);
 
 	const handleChange = (event, newValue) => {
 		setValue(newValue);

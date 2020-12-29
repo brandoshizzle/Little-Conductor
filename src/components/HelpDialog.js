@@ -29,7 +29,7 @@ const AlertDialog = (props) => {
 				<DialogContent>
 					<div>
 						<Typography variant="body1">
-							Spotify probably needs to re-authenticate.
+							1. Spotify probably needs to re-authenticate.
 						</Typography>
 
 						<Button
@@ -46,10 +46,13 @@ const AlertDialog = (props) => {
 							size="small">
 							Click here
 						</Button>
+						<Typography variant="body1">
+							then refresh your webpage
+						</Typography>
 						<br />
 						<Typography variant="body1">
-							If the above button not work, let's reset all your
-							data.
+							2. If the above button not work, let's reset all
+							your data.
 						</Typography>
 						<Button
 							variant="contained"
@@ -66,9 +69,12 @@ const AlertDialog = (props) => {
 							size="small">
 							Click here
 						</Button>
+						<Typography variant="body1">
+							then refresh your webpage
+						</Typography>
 						<br />
 						<Typography variant="body1">
-							If those didn't work, contact Brandon.
+							3. If those didn't work, contact Brandon.
 						</Typography>
 						<Button
 							variant="contained"
@@ -78,6 +84,9 @@ const AlertDialog = (props) => {
 							size="small">
 							Click here
 						</Button>
+						<Typography variant="body1">
+							but don't refresh your webpage
+						</Typography>
 					</div>
 				</DialogContent>
 			</Dialog>

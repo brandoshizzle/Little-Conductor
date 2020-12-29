@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Tooltip from "@material-ui/core/Tooltip";
+import EditIcon from "@material-ui/icons/Edit";
 import ReactDataGrid from "react-data-grid";
 import * as api from "./../api";
+
+import RearrangeAlbums from "./RearrangeAlbums";
 
 import { view } from "@risingstack/react-easy-state";
 import { user } from "./../store";
@@ -32,6 +35,19 @@ const PlaylistTable = (props) => {
 		user.allPlaylists
 	);
 	const [rows, setRows] = useState(user.allPlaylists);
+	const [editAlbumsOpen, setEditAlbumsOpen] = useState(false);
+	const [
+		rearrangePlaylistSelection,
+		setRearrangePlaylistSelection,
+	] = useState({});
+
+	const onModalOpen = () => {
+		setEditAlbumsOpen(true);
+	};
+
+	const onModalClose = () => {
+		setEditAlbumsOpen(false);
+	};
 
 	useEffect(() => {
 		// Get data from storage or API on launch
@@ -146,6 +162,22 @@ const PlaylistTable = (props) => {
 		}
 	}
 
+	const albumActions = function (column, row) {
+		const cellActions = {
+			albumsString: [
+				{
+					icon: <EditIcon />,
+					callback: () => {
+						console.log(row);
+						setRearrangePlaylistSelection(row);
+						setEditAlbumsOpen(true);
+					},
+				},
+			],
+		};
+		return cellActions[column.key];
+	};
+
 	return (
 		<div className={classes.root}>
 			<ReactDataGrid
@@ -171,6 +203,12 @@ const PlaylistTable = (props) => {
 						sortRows(user.allPlaylists, sortColumn, sortDirection)
 					);
 				}}
+				getCellActions={albumActions}
+			/>
+			<RearrangeAlbums
+				open={editAlbumsOpen}
+				close={onModalClose}
+				playlist={rearrangePlaylistSelection}
 			/>
 		</div>
 	);
