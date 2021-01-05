@@ -12,6 +12,7 @@ import { view } from "@risingstack/react-easy-state";
 import { user } from "./../store";
 
 import PlaylistAlbumsPage from "./PlaylistAlbumsPage";
+import LSRPage from "./LSRPage";
 import UtilitiesPage from "./UtilitiesPage";
 
 function TabPanel(props) {
@@ -96,7 +97,8 @@ const Main = (props) => {
 						aria-label="simple tabs example"
 						style={{ width: "75%" }}>
 						<Tab label="Playlist Tools" {...a11yProps(0)} />
-						<Tab label="Utilities" {...a11yProps(1)} />
+						<Tab label="LSR" {...a11yProps(1)} />
+						<Tab label="Utilities" {...a11yProps(2)} />
 					</Tabs>
 					<div style={{ position: "absolute", top: 10, right: 10 }}>
 						<Typography variant="h5">
@@ -110,6 +112,9 @@ const Main = (props) => {
 					<PlaylistAlbumsPage token={token} />
 				</TabPanel>
 				<TabPanel value={value} index={1}>
+					<LSRPage token={token} />
+				</TabPanel>
+				<TabPanel value={value} index={2}>
 					<UtilitiesPage token={token} />
 				</TabPanel>
 			</div>

@@ -21,58 +21,19 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-const UtilitiesAlbumPage = (props) => {
+const LSRPage = (props) => {
 	const classes = useStyles();
 	const sidebarWidth = 250;
 
-	const [followList, setFollowList] = React.useState("");
-	const [statsToGetList, setStatsToGetList] = React.useState("");
-	const [resultsListString, setResultsListString] = React.useState("");
+	const [playlistList, setPlaylistList] = React.useState("");
+	// const [resultsListString, setResultsListString] = React.useState("");
 
-	const handleFollowListChange = (event) => {
-		setFollowList(event.target.value);
+	const handlePlaylistListChange = (event) => {
+		setPlaylistList(event.target.value);
 	};
-	const handleFollowStatsChange = (event) => {
-		setStatsToGetList(event.target.value);
-	};
-
-	async function getFollowers() {
-		console.log("starting");
-		const results = await api.getFollowerCounts(statsToGetList);
-		console.log(results);
-		setResultsListString(results);
-	}
 
 	return (
 		<div className={classes.root}>
-			<div style={{ width: 300 }}>
-				<form noValidate autoComplete="off">
-					<div>
-						<Paper style={{ width: 250 }}>
-							<TextField
-								id="outlined-multiline-static"
-								label="Playlists to Follow"
-								multiline
-								rows={20}
-								defaultValue=""
-								variant="outlined"
-								onChange={handleFollowListChange}
-								style={{ width: 250 }}
-							/>
-						</Paper>
-					</div>
-				</form>
-				<Button
-					style={{ display: "block", marginTop: 10 }}
-					variant="contained"
-					color="primary"
-					onClick={() => {
-						api.followPlaylists(followList);
-					}}
-					size="small">
-					Follow playlists
-				</Button>
-			</div>
 			<div style={{ width: 600 }}>
 				<form
 					noValidate
@@ -82,12 +43,12 @@ const UtilitiesAlbumPage = (props) => {
 						<Paper style={{ width: 250 }}>
 							<TextField
 								id="outlined-multiline-static"
-								label="Get follow stats"
+								label="Playlist URIs"
 								multiline
 								rows={20}
 								defaultValue=""
 								variant="outlined"
-								onChange={handleFollowStatsChange}
+								onChange={handlePlaylistListChange}
 								style={{ width: 250 }}
 							/>
 						</Paper>
@@ -100,12 +61,12 @@ const UtilitiesAlbumPage = (props) => {
 					<div>
 						<Paper style={{ width: 250 }}>
 							<TextField
-								id="follower-results"
-								label="Results appear here"
+								id="results"
+								label="Results"
 								multiline
 								rows={20}
+								defaultValue=""
 								variant="outlined"
-								value={resultsListString}
 								style={{ width: 250 }}
 							/>
 						</Paper>
@@ -116,10 +77,10 @@ const UtilitiesAlbumPage = (props) => {
 					variant="contained"
 					color="primary"
 					onClick={() => {
-						getFollowers();
+						api.getPlaypastingData(playlistList);
 					}}
 					size="small">
-					Get follow counts
+					Get Playpasting Data
 				</Button>
 			</div>
 			<div
@@ -136,4 +97,4 @@ const UtilitiesAlbumPage = (props) => {
 	);
 };
 
-export default UtilitiesAlbumPage;
+export default LSRPage;

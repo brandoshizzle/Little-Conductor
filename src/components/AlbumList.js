@@ -10,6 +10,7 @@ import Typography from "@material-ui/core/Typography";
 import axios from "axios";
 import { view } from "@risingstack/react-easy-state";
 import { user } from "./../store";
+import { getUserAlbumsFromSpotify } from "../api/utilities";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -31,36 +32,10 @@ Object.filter = (obj, predicate) =>
 
 const AlbumList = (props) => {
 	const classes = useStyles();
-	const { token } = props;
-	// const [selectedAlbums, setSelectedAlbums] = useState([]);
-	// let [albums, setAlbums] = useState([]);
 
 	useEffect(() => {
-		async function loadAlbums() {
-			let nextLink;
-			user.log("Getting LS albums...");
-			do {
-				let res = await axios.get(
-					nextLink ||
-						"https://api.spotify.com/v1/artists/4SCWiQbJCMTHK737aNUqBJ/albums?offset=0&limit=50&market=CA",
-					{
-						headers: {
-							Authorization: "Bearer " + token,
-						},
-					}
-				);
-				// console.log(res);
-				// albums = albums.concat(res.data.items);
-				// console.log(user);
-				for (var i = 0; i < res.data.items.length; i++) {
-					user.allAlbums[res.data.items[i].id] = res.data.items[i];
-				}
-				nextLink = res.data.next;
-			} while (nextLink);
-			user.log(`Loaded ${Object.values(user.allAlbums).length} albums`);
-		}
 		// Get all LS albums
-		loadAlbums();
+		getUserAlbumsFromSpotify();
 		user.selectedAlbums = [];
 	}, []);
 
@@ -81,7 +56,7 @@ const AlbumList = (props) => {
 				className={classes.list}
 				component="nav"
 				aria-label="main mailbox folders">
-				<Typography variant="body1">Albums</Typography>
+				<Typography variant="body1">Releases</Typography>
 				{user.allAlbums &&
 					Object.values(
 						Object.filter(

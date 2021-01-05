@@ -12,7 +12,8 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import Avatar from "@material-ui/core/Avatar";
-import * as api from "./../api";
+import * as api from "../api/api";
+import SpotifySquare from "./../img/spotify-square.png";
 
 import { view } from "@risingstack/react-easy-state";
 import { user } from "./../store";
@@ -40,9 +41,18 @@ const RearrangeModal = (props) => {
 
 	useEffect(() => {
 		const albumsInfo = [];
+		console.log(props.playlist);
 		if (Object.keys(props.playlist).length > 0) {
 			props.playlist.albums.map((album, i) => {
-				albumsInfo.push(user.allAlbums[album.id]);
+				if (user.allAlbums.hasOwnProperty(album.id)) {
+					albumsInfo.push(user.allAlbums[album.id]);
+				} else {
+					albumsInfo.push({
+						id: album.id,
+						name: album.name,
+						images: [{}, { url: SpotifySquare }],
+					});
+				}
 			});
 			setAlbums(albumsInfo);
 			console.log(albumsInfo);
@@ -58,7 +68,7 @@ const RearrangeModal = (props) => {
 		});
 		user.selectedAlbums = newSelection;
 		user.selectedPlaylists = [props.playlist.id];
-		await api.addAlbums("end", "replace");
+		await api.addSelectedAlbumsToSelectedPlaylist("end", "replace");
 		user.selectedAlbums = oldSelection;
 		user.selectedPlaylists = oldPlaylistSelection;
 		props.close();
@@ -80,7 +90,7 @@ const RearrangeModal = (props) => {
 						gutterBottom>
 						{props.playlist.name}
 					</Typography>
-					<List>
+					<List style={{ overflowY: "scroll", maxHeight: 500 }}>
 						<ReactSortable
 							list={albums}
 							setList={setAlbums}

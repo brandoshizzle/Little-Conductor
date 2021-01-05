@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
-import * as api from "./../api";
+import * as api from "./../api/api";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 
@@ -71,7 +71,7 @@ const ActionButtons = (props) => {
 					color="primary"
 					className={classes.item}
 					onClick={() => {
-						api.addAlbums("start");
+						api.addSelectedAlbumsToSelectedPlaylist("start");
 					}}
 					size="small">
 					start
@@ -81,7 +81,17 @@ const ActionButtons = (props) => {
 					color="primary"
 					className={classes.item}
 					onClick={() => {
-						api.addAlbums("end");
+						api.addSelectedAlbumsToSelectedPlaylist("second");
+					}}
+					size="small">
+					second
+				</Button>
+				<Button
+					variant="contained"
+					color="primary"
+					className={classes.item}
+					onClick={() => {
+						api.addSelectedAlbumsToSelectedPlaylist("end");
 					}}
 					size="small">
 					end
@@ -91,10 +101,13 @@ const ActionButtons = (props) => {
 					color="primary"
 					className={classes.item}
 					onClick={() => {
-						api.addAlbums("start", "replace");
+						api.addSelectedAlbumsToSelectedPlaylist(
+							"start",
+							"replace"
+						);
 					}}
 					size="small">
-					Replace
+					Replace all
 				</Button>
 
 				<Typography

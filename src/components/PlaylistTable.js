@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import Tooltip from "@material-ui/core/Tooltip";
 import EditIcon from "@material-ui/icons/Edit";
 import ReactDataGrid from "react-data-grid";
-import * as api from "./../api";
+import * as api from "./../api/api";
 
 import RearrangeAlbums from "./RearrangeAlbums";
 
@@ -126,7 +126,7 @@ const PlaylistTable = (props) => {
 			formatter: nameFormatter,
 		},
 		{
-			key: "playlistMilliseconds",
+			key: "duration",
 			name: "Total length",
 			formatter: playlistLengthFormatter,
 			width: 100,

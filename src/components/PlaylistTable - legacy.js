@@ -109,7 +109,7 @@ const PlaylistTable = (props) => {
 								albumList: "Loading...",
 								albums: [],
 								lastUpdated: "Loading...",
-								playlistMilliseconds: "Loading...",
+								duration: "Loading...",
 							};
 						}
 					}
@@ -128,7 +128,7 @@ const PlaylistTable = (props) => {
 						newAlbums,
 						albumList,
 						lastUpdated,
-						playlistMilliseconds,
+						duration,
 					] = await api.getPlaylistTracksAndAlbums(playlist.id);
 					// console.log(newTracks, newAlbums, newAlbumList);
 					if (newTracks) {
@@ -138,9 +138,7 @@ const PlaylistTable = (props) => {
 						user.allPlaylists[
 							playlist.id
 						].lastUpdated = lastUpdated;
-						user.allPlaylists[
-							playlist.id
-						].playlistMilliseconds = playlistMilliseconds;
+						user.allPlaylists[playlist.id].duration = duration;
 					} else {
 						user.log(`${playlist.name} was not relaxing enough.`);
 						user.filteredPlaylists.push(playlist.id);
@@ -189,9 +187,9 @@ const PlaylistTable = (props) => {
 					},
 					{
 						title: "Total length",
-						field: "playlistMilliseconds",
+						field: "duration",
 						render: (rowData) => {
-							const ms = rowData.playlistMilliseconds;
+							const ms = rowData.duration;
 							if (ms === "Loading...") {
 								return "Loading...";
 							}

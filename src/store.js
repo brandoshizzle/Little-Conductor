@@ -45,7 +45,7 @@ export function addPlaylist(playlistData) {
 		albumsString: playlistData.albumsString,
 		albums: playlistData.albums,
 		lastUpdated: playlistData.lastUpdated,
-		playlistMilliseconds: playlistData.playlistMilliseconds,
+		duration: playlistData.duration,
 	});
 }
 
