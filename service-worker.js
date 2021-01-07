@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/Little-Conductor/precache-manifest.5628e294a5cdcd5f0236b76a6b50053c.js"
+  "/Little-Conductor/precache-manifest.4ab17375241ad6142ee73b654692004c.js"
 );
 
 workbox.clientsClaim();
