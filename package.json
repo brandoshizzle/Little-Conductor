@@ -30,7 +30,7 @@
 		"axios": "^0.19.2",
 		"axios-hooks": "^1.10.0",
 		"jquery": "^3.4.1",
-		"lodash": "^4.17.19",
+		"lodash": "^4.17.21",
 		"material-table": "^1.57.2",
 		"react": "^16.8.4",
 		"react-data-grid": "6.1.0",
